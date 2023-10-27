@@ -4,7 +4,7 @@
   "main": "src/back.js",
   "scripts": {
     "check-ts": "tsc --noEmit",
-    "install:python": "pip3 install -r src/python/requirements.txt",
+    "install:python": "pip install -r src/python/requirements.txt",
     "build:types": "graphql-codegen --config graphql-codegen.yml",
     "build:schema": "yarn build:types && node builder/schema/schema.js && node build/script-generate-schema.js",
     "build:prod": "yarn build:types && yarn check-ts && node builder/prod/prod.js",

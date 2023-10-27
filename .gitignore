@@ -5,3 +5,6 @@
 .venv
 venv
 .vscode
+opencti-platform/opencti-graphql/.venv
+opencti-platform/opencti-graphql/node_modules
+opencti-platform/opencti-front/node_modules
