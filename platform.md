@@ -49,6 +49,10 @@ $ sudo sysctl -w vm.max_map_count=262144
 
 The platform is developed on nodejs technology, so you need to install node and the yarn package manager.
 
+node的版本需要大于16.0。
+
+以下是在ubuntu上安装node和yarn，mac的可以自行百度。
+
 ```bash
 $ sudo apt-get install nodejs
 $ sudo curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
@@ -75,7 +79,7 @@ In development dependencies are deployed trough containers.
 A development compose file is available in `~/opencti/opencti-platform/opencti-dev`
 
 ```bash
-cd ~/docker
+cd ~/opencti/opencti-platform/opencti-dev
 #Start the stack in background
 docker-compose -f docker-compose.yml up -d
 ```
@@ -101,7 +105,7 @@ yarn install:python
 deactivate
 ```
 
-`yarn install:python` 的时候可能会出现`git+https://github.com/OpenCTI-Platform/client-python@master`无法pip install的相关的问题，参考https://blog.csdn.net/weixin_44386956/article/details/131379943将网址改成`git+https://gitclone.com/github.com/OpenCTI-Platform/client-python@master`
+`yarn install:python` 的时候可能会出现`git+https://github.com/OpenCTI-Platform/client-python@master`无法pip install的相关的问题，参考 https://blog.csdn.net/weixin_44386956/article/details/131379943 将网址改成 `git+https://gitclone.com/github.com/OpenCTI-Platform/client-python@master`
 
 ### 5.2 Development configuration
 
@@ -124,6 +128,8 @@ At minimum adapt the admin part for the password and token.
 ```
 
 ### 5.3 Install / start
+
+在启动后端前需要先启动在第4节中安装的docker容器
 
 Before starting the backend you need to install the nodejs modules
 
