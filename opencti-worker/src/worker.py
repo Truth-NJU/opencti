@@ -121,6 +121,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
         self.current_bundle_id: [str, None] = None
         self.current_bundle_seq: int = 0
 
+    # 获得当前线程的id
     @property
     def id(self) -> Any:  # pylint: disable=inconsistent-return-statements
         if hasattr(self, "_thread_id"):
