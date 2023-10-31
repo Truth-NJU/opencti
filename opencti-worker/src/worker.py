@@ -131,6 +131,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
             if thread is self:
                 return id_
 
+    # 设置线程的异步异常
     def terminate(self) -> None:
         thread_id = self.id
         res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
@@ -140,6 +141,9 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
             self.api.log("info", "Unable to kill the thread")
 
+    # BlockingChannel 是一个类，它代表了一个与 RabbitMQ 消息队列通道的连接。
+    # 它是在使用 RabbitMQ 作为消息队列的情况下使用的。通过 BlockingChannel 对象，你可以发送和接收消息，以及执行其他与 RabbitMQ 通道相关的操作。
+    # 通知rabbitmq 消息处理失败
     def nack_message(self, channel: BlockingChannel, delivery_tag: int) -> None:
         if channel.is_open:
             self.api.log(
@@ -154,6 +158,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
                 + ") NOT rejected (channel closed)",
             )
 
+    # 通知rabbitmq 消息处理成功
     def ack_message(self, channel: BlockingChannel, delivery_tag: int) -> None:
         if channel.is_open:
             self.api.log(
@@ -168,11 +173,13 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
                 + ") NOT acknowledged (channel closed)",
             )
 
+    # 停止消费，关闭rabbitmq通道
     def stop_consume(self, channel: BlockingChannel) -> None:
         if channel.is_open:
             channel.stop_consuming()
 
     # Callable for consuming a message
+    # 处理消息
     def _process_message(
         self,
         channel: BlockingChannel,
@@ -187,6 +194,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
             + str(method.delivery_tag)
             + "), launching a thread...",
         )
+        # 创建线程，调用data_handler处理数据
         thread = Thread(
             target=self.data_handler,
             args=[self.pika_connection, channel, method.delivery_tag, data],
@@ -197,6 +205,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
         self.api.log("info", "Message processed, thread terminated")
 
     # Data handling
+    # 处理数据
     def data_handler(  # pylint: disable=too-many-statements, too-many-locals
         self,
         connection: Any,
