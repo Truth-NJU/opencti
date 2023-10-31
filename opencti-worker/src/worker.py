@@ -85,6 +85,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
     ssl_verify: Union[bool, str] = False
     json_logging: bool = False
 
+    # 与OpenCTI API客户端建立连接，设置消息队列，并配置RabbitMQ通道以进行消息处理。
     def __post_init__(self) -> None:
         super().__init__()
         self.api = OpenCTIApiClient(
