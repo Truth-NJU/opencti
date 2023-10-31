@@ -233,6 +233,7 @@ class Consumer(Thread):  # pylint: disable=too-many-instance-attributes
             processing_count = self.processing_count
             if self.processing_count == PROCESSING_COUNT:
                 processing_count = None  # type: ignore
+            # 将数据导入到系统
             if event_type == "bundle":
                 content = base64.b64decode(data["content"]).decode("utf-8")
                 update = data["update"] if "update" in data else False
@@ -483,6 +484,7 @@ class Worker:  # pylint: disable=too-few-public-methods, too-many-instance-attri
             metrics.set_meter_provider(provider)
 
         # Check if openCTI is available
+        # 连接opencti
         self.api = OpenCTIApiClient(
             url=self.opencti_url,
             token=self.opencti_token,
@@ -496,6 +498,7 @@ class Worker:  # pylint: disable=too-few-public-methods, too-many-instance-attri
         self.queues: List[Any] = []
 
     # Start the main loop
+    # 循环获取消息并进行处理
     def start(self) -> None:
         sleep_delay = 60
         while True:
