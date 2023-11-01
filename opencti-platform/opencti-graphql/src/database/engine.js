@@ -159,6 +159,7 @@ const openSearchClient = new OpenClient(searchConfiguration);
 let isRuntimeSortingEnable = false;
 let engine = openSearchClient;
 
+// OpenSearch是一个开源的搜索和分析引擎，它基于Elasticsearch构建
 // The OpenSearch/ELK Body Parser (oebp)
 // Starting ELK8+, response are no longer inside a body envelop
 // Query wrapping is still accepted in ELK8
@@ -184,6 +185,7 @@ export const searchEngineVersion = async () => {
   return { platform: searchPlatform, version: searchVersion, engine: localEngine };
 };
 
+// 初始化ES
 export const searchEngineInit = async () => {
   // Select the correct engine
   const engineSelector = conf.get('elasticsearch:engine_selector') || 'auto';
@@ -225,6 +227,7 @@ export const searchEngineInit = async () => {
 };
 export const isRuntimeSortEnable = () => isRuntimeSortingEnable;
 
+// 进行数据搜索，并解析搜索结果
 export const elRawSearch = (context, user, types, query) => {
   const elRawSearchFn = async () => engine.search(query).then((r) => {
     const parsedSearch = oebp(r);
@@ -292,6 +295,8 @@ const elOperationForMigration = (operation) => {
 export const elUpdateByQueryForMigration = elOperationForMigration(elRawUpdateByQuery);
 export const elDeleteByQueryForMigration = elOperationForMigration(elRawDeleteByQuery);
 
+
+// 该函数根据用户的访问权限构建数据限制，并返回所需的过滤器。
 const buildDataRestrictions = async (context, user, opts = {}) => {
   const must = [];
   // eslint-disable-next-line camelcase
@@ -432,6 +437,8 @@ export const elPlatformIndices = async () => {
   const listIndices = await engine.cat.indices({ index: `${ES_INDEX_PREFIX}*`, format: 'JSON' });
   return oebp(listIndices);
 };
+
+// 创建一个 Elasticsearch 索引的生命周期策略
 const elCreateLifecyclePolicy = async () => {
   if (engine instanceof ElkClient) {
     await engine.ilm.putLifecycle({

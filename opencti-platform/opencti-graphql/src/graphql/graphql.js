@@ -21,6 +21,11 @@ import telemetryPlugin from './telemetryPlugin';
 import httpResponsePlugin from './httpResponsePlugin';
 import { executionContext } from '../utils/access';
 
+// 该文件创建graphql服务
+ 
+// 创建一个Apollo Server实例。该函数配置了一个GraphQL模式、插件和验证规则。
+// 函数还设置了Apollo Server的播放场选项，包括标题、favicon和凭据设置。它还配置了服务器处理模式概览请求，并设置了一个上下文函数，用于身份验证用户并设置执行上下文
+// Apollo Server是一个用于构建GraphQL API的工具。它提供了一个灵活且可扩展的平台，用于定义和执行GraphQL模式，处理客户端请求，并提供了各种插件和功能，如身份验证、缓存和扩展。它是Apollo Graph Platform的一部分，提供了用于构建和部署GraphQL API的完整解决方案。
 const createApolloServer = () => {
   const schema = createSchema();
   const apolloPlugins = [loggerPlugin, httpResponsePlugin];

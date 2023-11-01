@@ -8,6 +8,7 @@ import { OPENCTI_ADMIN_UUID } from '../schema/general';
 import { BYPASS, VIRTUAL_ORGANIZATION_ADMIN, SETTINGS_SET_ACCESSES } from '../utils/access';
 
 // eslint-disable-next-line
+// 在给定的schema中为指定的directiveName添加身份验证和授权逻辑。
 export const authDirectiveBuilder = (directiveName) => {
   const typeDirectiveArgumentMaps = {};
   return {

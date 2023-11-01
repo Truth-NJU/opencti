@@ -73,6 +73,7 @@ import stixMetaObjectResolvers from '../resolvers/stixMetaObject';
 
 const schemaTypeDefs = [globalTypeDefs];
 
+// 验证stixid的正确性
 const validateStixId = (stixId) => {
   if (!stixId.includes('--')) {
     throw new UserInputError(`Provided value ${stixId} is not a valid STIX ID`);
@@ -256,6 +257,10 @@ export const registerGraphqlSchema = ({ schema, resolver }) => {
   schemaResolvers.push(resolver);
 };
 
+// 用于创建和返回一个GraphQL模式
+// GraphQL模式（schema）是一个定义了GraphQL API的类型系统的核心部分。它描述了API提供的数据结构和可用的查询操作。
+// 模式定义了可用的对象类型、字段、查询操作以及其他相关的元素。通过模式，客户端可以发出查询请求，并获取符合模式定义的数据。
+// 相当于后端接口
 const createSchema = () => {
   const resolvers = mergeResolvers(schemaResolvers);
   const { authDirectiveTransformer } = authDirectiveBuilder('auth');
