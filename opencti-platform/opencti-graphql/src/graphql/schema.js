@@ -170,6 +170,8 @@ const globalResolvers = {
     parseLiteral: (ast) => parseAst(ast)
   }),
 };
+
+
 const schemaResolvers = [
   // INTERNAL
   globalResolvers,
@@ -262,6 +264,10 @@ export const registerGraphqlSchema = ({ schema, resolver }) => {
 // 模式定义了可用的对象类型、字段、查询操作以及其他相关的元素。通过模式，客户端可以发出查询请求，并获取符合模式定义的数据。
 // 相当于后端接口
 const createSchema = () => {
+  // Merge resolvers
+  // 在GraphQL中，mergeResolvers方法用于合并多个解析器对象（schemaResolvers），以创建一个统一的解析器。
+  // mergeResolvers方法接受一个或多个解析器对象作为参数，并将它们合并成一个单一的解析器对象。合并后的解析器对象将包含所有传入解析器对象中定义的查询、变更和订阅字段解析器。
+  // 通过使用mergeResolvers方法，开发人员可以将多个不同的解析器对象组合在一起，以形成一个完整的解析器。这样可以方便地将不同的解析器逻辑组织在一起，使得整个GraphQL服务器的解析器逻辑更加清晰和可维护。
   const resolvers = mergeResolvers(schemaResolvers);
   const { authDirectiveTransformer } = authDirectiveBuilder('auth');
   let schema = makeExecutableSchema({

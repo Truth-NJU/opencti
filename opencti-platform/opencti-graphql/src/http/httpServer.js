@@ -24,6 +24,7 @@ const rejectUnauthorized = booleanConf('app:https_cert:reject_unauthorized', tru
 
 const onHealthCheck = () => checkSystemDependencies();
 
+// 创建一个HTTP服务器。它还设置了一个WebSocket服务器，用于支持GraphQL订阅。
 const createHttpServer = async () => {
   const app = express();
   app.use(applicationSession.session);

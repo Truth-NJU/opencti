@@ -258,10 +258,14 @@ export const elRawSearch = (context, user, types, query) => {
     [SemanticAttributes.DB_STATEMENT]: JSON.stringify(query),
   }, elRawSearchFn);
 };
+
+// 它使用engine.deleteByQuery方法根据提供的查询删除数据，然后返回调用oebp函数并传入被删除的数据的结果
 export const elRawDeleteByQuery = (query) => engine.deleteByQuery(query).then((r) => oebp(r));
 export const elRawBulk = (args) => engine.bulk(args).then((r) => oebp(r));
+// 它使用engine.updateByQuery方法根据提供的查询更新数据，然后返回调用oebp函数并传入被更新的数据的结果
 export const elRawUpdateByQuery = (query) => engine.updateByQuery(query).then((r) => oebp(r));
 
+// Execute the update by query in async mode
 const elOperationForMigration = (operation) => {
   const elGetTask = (taskId) => engine.tasks.get({ task_id: taskId }).then((r) => oebp(r));
 
@@ -410,6 +414,10 @@ const buildDataRestrictions = async (context, user, opts = {}) => {
   return { must, must_not };
 };
 
+
+// 该函数的作用是根据用户对象和可选的权限标志生成一个用户成员访问过滤器。
+// 它根据用户的权限和角色，以及是否包含权限标志，生成一个过滤器数组，用于授权用户对特定资源的访问。
+// 如果包含权限标志，则还会生成一个所有者过滤器，用于进一步限制访问。最后，返回一个包含授权过滤器的数组。
 export const buildUserMemberAccessFilter = (user, includeAuthorities = false) => {
   const capabilities = user.capabilities.map((c) => c.name);
   if (includeAuthorities && capabilities.includes(BYPASS)) {
@@ -429,16 +437,20 @@ export const buildUserMemberAccessFilter = (user, includeAuthorities = false) =>
   return [{ bool: { should: authorizedFilters } }];
 };
 
+// 检查指定名称的索引是否存在于Elasticsearch中
 export const elIndexExists = async (indexName) => {
   const existIndex = await engine.indices.exists({ index: indexName });
   return oebp(existIndex) === true;
 };
+
+// 获取Elasticsearch所有索引
 export const elPlatformIndices = async () => {
   const listIndices = await engine.cat.indices({ index: `${ES_INDEX_PREFIX}*`, format: 'JSON' });
   return oebp(listIndices);
 };
 
 // 创建一个 Elasticsearch 索引的生命周期策略
+// Elasticsearch的索引生命周期策略允许您在索引的生命周期内执行各种操作
 const elCreateLifecyclePolicy = async () => {
   if (engine instanceof ElkClient) {
     await engine.ilm.putLifecycle({
@@ -496,6 +508,8 @@ const elCreateLifecyclePolicy = async () => {
     });
   }
 };
+
+// 一些设置
 const elCreateCoreSettings = async () => {
   await engine.cluster.putComponentTemplate({
     name: `${ES_INDEX_PREFIX}-core-settings`,
@@ -523,6 +537,8 @@ const elCreateCoreSettings = async () => {
     throw DatabaseError('[SEARCH] Error creating component template', { error: e });
   });
 };
+
+// 使用Elastic App Search库为Elasticsearch创建了一个索引模板。
 const elCreateIndexTemplate = async (index) => {
   let settings;
   if (engine instanceof ElkClient) {
@@ -731,6 +747,8 @@ const elCreateIndexTemplate = async (index) => {
     throw DatabaseError('[SEARCH] Error creating index template', { error: e });
   });
 };
+
+// 更新索引映射
 export const elUpdateMapping = async (properties) => {
   const indices = await elPlatformIndices();
   await engine.indices.putMapping({
@@ -742,6 +760,8 @@ export const elUpdateMapping = async (properties) => {
     throw DatabaseError('[SEARCH] Error updating index mapping', { error: e });
   });
 };
+
+// 在es数据库中创建索引
 export const elCreateIndices = async (indexesToCreate = WRITE_PLATFORM_INDICES) => {
   await elCreateCoreSettings();
   await elCreateLifecyclePolicy();
@@ -758,6 +778,8 @@ export const elCreateIndices = async (indexesToCreate = WRITE_PLATFORM_INDICES) 
   }
   return createdIndices;
 };
+
+// 删除索引
 export const elDeleteIndices = async (indexesToDelete) => {
   return Promise.all(
     indexesToDelete.map((index) => {
@@ -773,6 +795,7 @@ export const elDeleteIndices = async (indexesToDelete) => {
   );
 };
 
+// RUNTIME_ATTRIBUTES是一个特殊的属性，用于在索引创建或更新时动态地设置索引的属性。它允许您在索引级别上设置一些特定的属性，而无需预先定义这些属性。这些属性可以包括一些与索引的行为、分析器、分片等相关的属性。通过使用RUNTIME_ATTRIBUTES，您可以根据需要动态地更改索引的属性，而无需重新创建索引。
 export const RUNTIME_ATTRIBUTES = {
   observable_value: {
     field: 'observable_value.keyword',
@@ -964,6 +987,8 @@ export const RUNTIME_ATTRIBUTES = {
 };
 
 // region relation reconstruction
+// 在Elasticsearch中，BuildRelation的作用是构建一个关系对象。它接受两个参数：type和connection。type参数表示关系的类型，connection参数表示关系的连接信息。该函数返回一个对象，其中包含了根据type和connection参数派生的属性和值。
+// 通过使用BuildRelation函数，可以方便地构建和处理Elasticsearch中的关系对象。
 const elBuildRelation = (type, connection) => {
   return {
     [type]: null,
@@ -973,6 +998,8 @@ const elBuildRelation = (type, connection) => {
     [`${type}Type`]: R.head(connection.types),
   };
 };
+
+// 将多个关系对象合并为一个关系对象
 const elMergeRelation = (concept, fromConnection, toConnection) => {
   if (!fromConnection || !toConnection) {
     throw DatabaseError('[SEARCH] Something failed in reconstruction of the relation', concept.internal_id);
@@ -983,6 +1010,7 @@ const elMergeRelation = (concept, fromConnection, toConnection) => {
   to.target_ref = `${convertTypeToStixType(to.toType)}--temporary`;
   return R.mergeAll([concept, from, to]);
 };
+// 根据给定的连接对象和关系对象类型，重建一个关系对象，并返回修改后的关系对象。
 export const elRebuildRelation = (concept) => {
   if (concept.base_type === BASE_TYPE_RELATION) {
     const { connections } = concept;
@@ -995,6 +1023,8 @@ export const elRebuildRelation = (concept) => {
   }
   return concept;
 };
+
+// 将从Elasticsearch格式转换为特定格式的数据
 const elDataConverter = (esHit, withoutRels = false) => {
   const elementData = esHit._source;
   const data = {
@@ -1039,6 +1069,8 @@ const elDataConverter = (esHit, withoutRels = false) => {
 };
 // endregion
 
+// 在ES中，FindByFromAndTo的作用是根据给定的fromId、toId和relationshipType查找相关的数据。
+// 它使用了一系列的查询条件来筛选符合条件的数据，并返回结果数组。
 export const elFindByFromAndTo = async (context, user, fromId, toId, relationshipType) => {
   const mustTerms = [];
   const markingRestrictions = await buildDataRestrictions(context, user);
@@ -1101,6 +1133,7 @@ export const elFindByFromAndTo = async (context, user, fromId, toId, relationshi
   }
   return hits;
 };
+// 根据给定的ID列表查找相关的数据。它接受一个ID列表作为参数，并使用这些ID来执行查询操作。查询结果将返回与这些ID对应的数据。
 export const elFindByIds = async (context, user, ids, opts = {}) => {
   const { indices = READ_DATA_INDICES, baseData = false, baseFields = BASE_FIELDS } = opts;
   const { withoutRels = false, onRelationship = null, toMap = false, mapWithAllIds = false, type = null, forceAliases = false } = opts;
@@ -1230,6 +1263,8 @@ export const elFindByIds = async (context, user, ids, opts = {}) => {
   }
   return toMap ? hits : Object.values(hits);
 };
+
+// 用于根据给定的ID从索引中加载文档。它通常用于查找和检索特定文档的内容。
 export const elLoadById = async (context, user, id, opts = {}) => {
   const hits = await elFindByIds(context, user, id, opts);
   /* istanbul ignore if */
@@ -1239,12 +1274,15 @@ export const elLoadById = async (context, user, id, opts = {}) => {
   }
   return R.head(hits);
 };
+
+// 批量加载文档的操作。它允许您一次性检索多个具有不同ID的文档。
 export const elBatchIds = async (context, user, ids) => {
   const hits = await elFindByIds(context, user, ids);
   return ids.map((id) => R.find((h) => h.internal_id === id, hits));
 };
 
 // region elastic common loader.
+// 数的作用是将query字符串中的特殊字符进行转义。它使用正则表达式替换掉一些特殊字符，例如/, +, |, -, *, (, ), ^, ~, {, }, [, ], :, ?, \\等。这样可以确保在使用query字符串进行搜索或其他操作时，这些特殊字符不会引起错误或意外的行为。
 export const specialElasticCharsEscape = (query) => {
   return query.replace(/([/+|\-*()^~={}[\]:?\\])/g, '\\$1');
 };
@@ -1264,6 +1302,9 @@ const BASE_SEARCH_ATTRIBUTES = [
   // Add all other attributes
   '*',
 ];
+
+// 它用于生成全文搜索的查询条件。它接受一个搜索字符串和一个可选的参数对象，并返回一个查询条件数组。
+// 这个查询条件数组包含了满足特定条件的搜索词，这些条件可以通过参数对象进行配置。通过使用这个函数，您可以根据自己的需求生成适合搜索的查询条件。
 export const elGenerateFullTextSearchShould = (search, args = {}) => {
   const { useWildcardPrefix = false, useWildcardSuffix = true } = args;
   let decodedSearch;
@@ -1368,6 +1409,8 @@ export const elGenerateFullTextSearchShould = (search, args = {}) => {
 
 const BASE_FIELDS = ['_index', 'internal_id', 'standard_id', 'sort', 'base_type', 'entity_type',
   'connections', 'first_seen', 'last_seen', 'start_time', 'stop_time'];
+
+// 方便地构建复杂的查询条件，并将其转换为JSON格式的查询请求体。
 const elQueryBodyBuilder = async (context, user, options) => {
   // eslint-disable-next-line no-use-before-define
   const { ids = [], first = 200, after, orderBy = null, orderMode = 'asc', noSize = false, noSort = false, intervalInclude = false } = options;
