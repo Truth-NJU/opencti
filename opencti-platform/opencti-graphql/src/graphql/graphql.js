@@ -62,6 +62,7 @@ const createApolloServer = () => {
     faviconUrl: `${basePath}/static/@apollographql/graphql-playground-react@1.7.42/build/static/favicon.png`,
     settings: { 'request.credentials': 'include' }
   };
+  // ApolloServerPluginLandingPageGraphQLPlayground是一个Apollo Server插件，它的作用是在Apollo Server启动时提供一个GraphQL Playground界面，以便开发人员可以使用它来浏览和测试GraphQL API
   const playgroundPlugin = ApolloServerPluginLandingPageGraphQLPlayground(playgroundOptions);
   apolloPlugins.push(PLAYGROUND_ENABLED ? playgroundPlugin : ApolloServerPluginLandingPageDisabled());
   // Schema introspection must be accessible only for auth users.

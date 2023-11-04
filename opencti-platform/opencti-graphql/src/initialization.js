@@ -155,6 +155,9 @@ export const checkSystemDependencies = async () => {
 };
 
 // Initialize
+// 它首先检查名为INDEX_INTERNAL_OBJECTS的索引是否存在于Elasticsearch中。
+// 如果索引存在，则抛出一个错误，指示之前的初始化失败，并且需要重新启动平台。
+// 如果索引不存在，则在Elasticsearch中创建默认的索引，并记录一条消息，指示搜索引擎索引已加载完毕。
 const initializeSchema = async () => {
   // New platform so delete all indices to prevent conflict
   const isInternalIndexExists = await elIndexExists(INDEX_INTERNAL_OBJECTS);

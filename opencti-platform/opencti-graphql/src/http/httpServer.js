@@ -44,6 +44,9 @@ const createHttpServer = async () => {
   }
   httpServer.setTimeout(REQ_TIMEOUT || MIN_20);
   // subscriptionServer
+  // subscriptionServer通常与GraphQL一起使用，以便在GraphQL查询或变更操作之外提供实时数据更新。
+  // 它可以与各种后端技术（如RESTful API、数据库、消息队列等）集成，以便在数据发生更改时通知客户端。
+  // subscriptionServer提供了一种简单而有效的方式来处理实时数据更新，使客户端能够及时获取最新的数据。
   const subscriptionServer = SubscriptionServer.create(
     {
       schema,

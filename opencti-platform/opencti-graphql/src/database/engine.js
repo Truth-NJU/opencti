@@ -1713,6 +1713,8 @@ const elQueryBodyBuilder = async (context, user, options) => {
   }
   return body;
 };
+
+// 计算匹配的文档数量
 export const elCount = async (context, user, indexName, options = {}) => {
   const body = await elQueryBodyBuilder(context, user, { ...options, noSize: true, noSort: true });
   const query = { index: indexName, body };
@@ -1722,6 +1724,7 @@ export const elCount = async (context, user, indexName, options = {}) => {
       return oebp(data).count;
     });
 };
+// 一个聚合函数，用于根据指定的间隔对字段进行分组，并计算每个分组中的文档数量。
 export const elHistogramCount = async (context, user, indexName, options = {}) => {
   const { interval, field, types = null } = options;
   const body = await elQueryBodyBuilder(context, user, { ...options, dateAttribute: field, noSize: true, noSort: true, intervalInclude: true });
@@ -1776,6 +1779,8 @@ export const elHistogramCount = async (context, user, indexName, options = {}) =
     return R.map((b) => ({ date: R.head(b), value: R.last(b).weight.value }), dataToPairs);
   });
 };
+
+// 一个聚合函数，用于计算匹配的文档数量
 export const elAggregationCount = async (context, user, indexName, options = {}) => {
   const { field, types = null } = options;
   const isIdFields = field.endsWith('internal_id');
@@ -1820,6 +1825,7 @@ export const elAggregationCount = async (context, user, indexName, options = {})
     });
 };
 // field can be "entity_type" or "internal_id"
+// 据提供的参数和另一个函数调用的结果构建聚合查询过滤器。
 const buildAggregationRelationFilters = async (context, user, aggregationFilters) => {
   const aggBody = await elQueryBodyBuilder(context, user, { ...aggregationFilters, noSize: true, noSort: true });
   return {
@@ -1829,6 +1835,7 @@ const buildAggregationRelationFilters = async (context, user, aggregationFilters
     },
   };
 };
+// 计算聚合关系的数量。
 export const elAggregationRelationsCount = async (context, user, indexName, options = {}) => {
   const { types = [], field = null, searchOptions, aggregationOptions, aggregateOnConnections = true } = options;
   if (!R.includes(field, ['entity_type', 'internal_id', 'rel_object-marking.internal_id', 'rel_kill-chain-phase.internal_id', 'creator_id', 'rel_created-by.internal_id', null])) {
@@ -1920,6 +1927,7 @@ export const elAggregationRelationsCount = async (context, user, indexName, opti
     });
 };
 
+// 聚合操作的列表
 export const elAggregationsList = async (context, user, indexName, aggregations, opts = {}) => {
   const { types = [], resolveToRepresentative = true } = opts;
   const queryAggs = {};
@@ -1970,6 +1978,7 @@ export const elAggregationsList = async (context, user, indexName, aggregations,
   });
 };
 
+// 分页操作
 export const elPaginate = async (context, user, indexName, options = {}) => {
   // eslint-disable-next-line no-use-before-define
   const { baseData = false, first = 200 } = options;
@@ -2018,6 +2027,8 @@ export const elPaginate = async (context, user, indexName, options = {}) => {
       }
     );
 };
+// 执行一个搜索操作，并将搜索结果存储在一个数组中。
+// 它使用了 elPaginate 函数来进行分页搜索，并根据给定的选项进行了一些处理。最终，它返回了一个数组，其中包含了搜索结果。
 export const elList = async (context, user, indexName, options = {}) => {
   const { first = MAX_SEARCH_SIZE, infinite = false } = options;
   let hasNextPage = true;
@@ -2050,6 +2061,8 @@ export const elList = async (context, user, indexName, options = {}) => {
   }
   return listing;
 };
+
+// 根据给定的字段和值从索引中加载文档
 export const elLoadBy = async (context, user, field, value, type = null, indices = READ_DATA_INDICES) => {
   const opts = { filters: [{ key: field, values: [value] }], connectionFormat: false, types: type ? [type] : [] };
   const hits = await elPaginate(context, user, indices, opts);
@@ -2102,6 +2115,7 @@ export const elAttributeValues = async (context, user, field, opts = {}) => {
 };
 // endregion
 
+// 批量操作 Elasticsearch 文档的工具。它可以一次性将多个文档批量地插入到 Elasticsearch 中，从而提高插入性能
 export const elBulk = async (args) => {
   return elRawBulk(args).then((data) => {
     if (data.errors) {
@@ -2556,6 +2570,7 @@ export const elUpdateElement = async (instance) => {
   return Promise.all([replacePromise, connectionPromise]);
 };
 
+// getStats 是一个用于获取 Elasticsearch 集群统计信息的 API。它返回有关集群的各种统计数据，例如索引数量、文档数量、磁盘使用情况、内存使用情况等。通过调用 getStats API，你可以获取到关于集群的重要信息，以便进行性能监控、资源管理和优化。
 export const getStats = () => {
   return engine.indices
     .stats({ index: READ_PLATFORM_INDICES }) //
