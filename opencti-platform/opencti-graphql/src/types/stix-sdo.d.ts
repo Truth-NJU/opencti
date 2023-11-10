@@ -269,6 +269,13 @@ export interface StixReport extends StixContainer {
   };
 }
 
+export interface Arch{
+  name: string
+  description: string
+  arch_types: Array<string>
+  published: StixDate
+}
+
 // Threat Actor Specific Properties
 // name, description, threat_actor_types, aliases, first_seen, last_seen, roles, goals,
 // sophistication, resource_level, primary_motivation, secondary_motivations, personal_motivations

@@ -310,6 +310,7 @@ interface BasicStoreEntity extends BasicStoreCommon {
   received_lines: Array<string>;
   parent_types: Array<string>;
   report_types: Array<string>;
+  arch_types:Array<string>;
   malware_types: Array<string>;
   aliases: Array<string>;
   authors: Array<string>;

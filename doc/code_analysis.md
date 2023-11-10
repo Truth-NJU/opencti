@@ -1,6 +1,6 @@
 <img src="./img/architecture.png" alt="img" style="zoom:60%;" />
 
-# 1. opencti-graphql目录
+# 1. opencti-graphql
 
 src/back.js负责启动整个后端，会调用platformStart方法，platformStart方法中会调用startModules方法，startModules方法会调用httpServer.start()方法，httpServer.start()方法会调用listenServer方法，listenServer方法会调用createHttpServer方法，createHttpServer方法会调用src/graphql/graphql.js中的createApolloServer方法
 
@@ -24,9 +24,29 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 
 # 2. OpenCTI源码修改
 
-经过对源码的分析，想要新增自定义接口来导入数据，重点需要关注**schemaResolvers**。可以以src/resolvers/report.js为例来进行学习怎么编写代码。同时还需要把项目运行起来，看看前端如何向graphql发送请求。
+经过对源码的分析，想要新增自定义接口来导入数据，重点需要关注**schemaResolvers**。可以以opencti-graphql/src/resolvers/report.js为例来进行学习怎么编写代码。同时还需要把项目运行起来，看看前端如何向graphql发送请求。前端发送请求的方式可以看一下opencti-front/src/private/components/analyses/reports/ReportCreation.tsx的写法。
 
+1. 添加opencti-graphql/src/resolvers/nh.js以及opencti-graphql/src/domain/nh.js
 
+2. 在opencti-graphql/src/graphql/schema.js中添加对应的resolver
+
+3. 加上resolver后还缺少schema，它会在opencti-graphql/src/graphql/schema.js的registerGraphqlSchema的方法中添加。该方法被opencti-graphql/src/schema/module.ts中的registerDefinition调用，用来注册graphql schema。registerDefinition中report对应ENTITY_TYPE_CONTAINER类型，会调用registerStixDomainConverter方法。
+
+   ![2](./img/error.png)
+
+4. 
+
+## 2.1 利用postman发送graphql请求进行测试
+
+请求网址：http://localhost:3000/graphql，请求为post。
+
+在[个人配置](http://localhost:3000/dashboard/profile/me)中找到api访问中的REQUIRED HEADERS，添加到postman的Headers中。
+
+在Body中选择json格式的raw，填入浏览器中发送的请求的内容，例如：
+
+```json
+{"id":"ReportCreationMutation","query":"mutation ReportCreationMutation(\n  $input: ReportAddInput!\n) {\n  reportAdd(input: $input) {\n    id\n    standard_id\n    name\n    description\n    entity_type\n    parent_types\n    ...ReportLine_node\n  }\n}\n\nfragment ReportLine_node on Report {\n  id\n  entity_type\n  name\n  description\n  published\n  report_types\n  createdBy {\n    __typename\n    __isIdentity: __typename\n    id\n    name\n    entity_type\n  }\n  objectMarking {\n    edges {\n      node {\n        id\n        definition_type\n        definition\n        x_opencti_order\n        x_opencti_color\n      }\n    }\n  }\n  objectLabel {\n    edges {\n      node {\n        id\n        value\n        color\n      }\n    }\n  }\n  creators {\n    id\n    name\n  }\n  status {\n    id\n    order\n    template {\n      name\n      color\n      id\n    }\n  }\n  workflowEnabled\n  created_at\n}\n","variables":{"input":{"name":"测试","description":"测试","content":"<p>测试</p>","published":"2023-11-10T14:19:24+08:00","confidence":75,"report_types":["internal-report"],"x_opencti_reliability":"A - Completely reliable","objectMarking":[],"objectAssignee":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectParticipant":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectLabel":[],"externalReferences":[]}}}
+```
 
 # 3. GraphQL
 

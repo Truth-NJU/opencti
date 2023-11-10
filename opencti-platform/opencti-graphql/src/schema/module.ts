@@ -17,6 +17,8 @@ import {
   ENTITY_TYPE_IDENTITY,
   ENTITY_TYPE_LOCATION,
   ENTITY_TYPE_THREAT_ACTOR,
+  ENTITY_TYPE_NH,
+  ABSTRACT_NH_OBJECT,
 } from './general';
 import { UnsupportedError } from '../config/errors';
 import { type AttributeDefinition, iAliasedIds, standardId } from './attribute-definition';
@@ -38,7 +40,7 @@ export interface ModuleDefinition<T extends StoreEntity, Z extends StixObject> {
     id: string
     name: string
     aliased?: boolean
-    category: 'Case' | 'Container' | 'Location' | 'Identity' | 'Stix-Domain-Object' | 'Stix-Meta-Object' | 'Internal-Object' | 'Threat-Actor'
+    category: 'Case' | 'Container' | 'Location' | 'Identity' | 'Stix-Domain-Object' | 'Stix-Meta-Object' | 'Internal-Object' | 'Threat-Actor' | 'NH'
   };
   graphql: {
     schema: any
@@ -75,6 +77,10 @@ export const registerDefinition = <T extends StoreEntity, Z extends StixObject>(
         schemaTypesDefinition.add(ENTITY_TYPE_THREAT_ACTOR, definition.type.name);
         schemaTypesDefinition.add(ABSTRACT_STIX_DOMAIN_OBJECT, definition.type.name);
         registerStixDomainConverter(definition.type.name, definition.converter);
+        break;
+      case ENTITY_TYPE_NH:
+        schemaTypesDefinition.add(ENTITY_TYPE_NH, definition.type.name);
+        schemaTypesDefinition.add(ABSTRACT_NH_OBJECT, definition.type.name);
         break;
       case ENTITY_TYPE_LOCATION:
         schemaTypesDefinition.add(ENTITY_TYPE_LOCATION, definition.type.name);

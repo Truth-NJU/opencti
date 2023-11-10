@@ -70,6 +70,7 @@ import stixResolvers from '../resolvers/stix';
 import { isSupportedStixType } from '../schema/identifier';
 import stixRefRelationshipResolvers from '../resolvers/stixRefRelationship';
 import stixMetaObjectResolvers from '../resolvers/stixMetaObject';
+import archResolvers from '../resolvers/nh';
 
 const schemaTypeDefs = [globalTypeDefs];
 
@@ -214,6 +215,7 @@ const schemaResolvers = [
   observedDataResolvers,
   opinionResolvers,
   reportResolvers,
+  archResolvers,
   courseOfActionResolvers,
   // Identities
   identityResolvers,

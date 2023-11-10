@@ -637,6 +637,7 @@ const convertReportToStix = (instance: StoreEntity, type: string): SDO.StixRepor
     }
   };
 };
+
 const convertNoteToStix = (instance: StoreEntity, type: string): SDO.StixNote => {
   assertType(ENTITY_TYPE_CONTAINER_NOTE, type);
   const note = buildStixDomain(instance);
@@ -1330,6 +1331,7 @@ const convertEmailMimePartToStix = (instance: StoreCyberObservable): SCO.StixEma
 export type ConvertFn<T extends StoreEntity, Z extends S.StixObject> = (instance: T) => Z;
 const stixDomainConverters = new Map<string, ConvertFn<any, any>>();
 const stixMetaConverters = new Map<string, ConvertFn<any, any>>();
+// registerStixDomainConverter函数的作用是注册将StoreEntity类型转换为S.StixObject类型的转换函数。它将转换函数存储在stixDomainConverters映射中，以便在后续的代码中使用。
 export const registerStixDomainConverter = <T extends StoreEntity, Z extends S.StixObject>(type: string, convertFn: ConvertFn<T, Z>) => {
   stixDomainConverters.set(type, convertFn);
 };

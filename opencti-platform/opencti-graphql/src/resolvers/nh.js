@@ -1,9 +1,6 @@
 import {
     addArch,
   } from '../domain/nh';
-  import { batchLoader } from '../database/middleware';
-  
-  const participantLoader = batchLoader(batchParticipants);
   
   const archResolvers = {
     Query: {
@@ -14,5 +11,5 @@ import {
     },
   };
   
-  export default reportResolvers;
+  export default archResolvers;
   
