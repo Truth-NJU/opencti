@@ -1,16 +1,16 @@
 import {
-    addReport,
+    addArch,
   } from '../domain/nh';
   import { batchLoader } from '../database/middleware';
   
   const participantLoader = batchLoader(batchParticipants);
   
-  const reportResolvers = {
+  const archResolvers = {
     Query: {
-      report: (_, { id }, context) => findById(context, context.user, id),
+      arch: (_, { id }, context) => findById(context, context.user, id),
     },
     Mutation: {
-      reportAdd: (_, { input }, context) => addReport(context, context.user, input),
+      archAdd: (_, { input }, context) => addArch(context, context.user, input),
     },
   };
   

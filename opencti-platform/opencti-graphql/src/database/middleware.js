@@ -3155,6 +3155,7 @@ const createEntityRaw = async (context, user, input, type, opts = {}) => {
           throw UnsupportedError('Cant upsert inferred entity. Too many entities resolved', { input, entityIds });
         }
         // If upsert come from a rule, do a specific upsert.
+        // 在数据库中执行实体的更新或插入操作
         return await upsertEntityRule(context, R.head(filteredEntities), input, { ...opts, locks: participantIds });
       }
       if (filteredEntities.length === 1) {

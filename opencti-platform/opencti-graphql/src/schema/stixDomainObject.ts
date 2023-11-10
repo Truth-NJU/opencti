@@ -51,6 +51,7 @@ export const ENTITY_TYPE_VULNERABILITY = 'Vulnerability';
 export const ENTITY_TYPE_INCIDENT = 'Incident';
 export const ENTITY_TYPE_DATA_COMPONENT = 'Data-Component';
 export const ENTITY_TYPE_DATA_SOURCE = 'Data-Source';
+export const ENTITY_TYPE_CONTAINER_ARCH = 'Archive';
 
 export const ENTITY_TYPE_RESOLVED_FILTERS = 'Resolved-Filters';
 
