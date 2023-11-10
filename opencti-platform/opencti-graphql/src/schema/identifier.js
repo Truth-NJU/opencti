@@ -418,6 +418,8 @@ export const generateWorkId = (connectorId) => {
   const timestamp = now();
   return { id: `work_${connectorId}_${timestamp}`, timestamp };
 };
+
+// 根据给定的实体类型和数据，生成一个标准的ID
 export const generateStandardId = (type, data) => {
   // Entities
   if (isStixMetaObject(type)) return generateStixId(type, data);

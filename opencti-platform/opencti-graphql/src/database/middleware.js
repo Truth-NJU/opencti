@@ -861,6 +861,8 @@ const createContainerSharingTask = (context, type, element, relations = []) => {
 };
 const indexCreatedElement = async (context, user, { element, relations }) => {
   // Continue the creation of the element and the connected relations
+  // elIndexElements函数的作用是将给定的元素批量索引到Elasticsearch中。
+  // 它将元素转换为适合索引的格式，并使用批量操作将它们发送到Elasticsearch进行索引。这个函数通常用于在数据库中创建或更新实体后，将实体的相关信息存储到Elasticsearch中以供快速搜索和查询。
   const indexPromise = elIndexElements(context, user, element.entity_type, [element, ...(relations ?? [])]);
   const taskPromise = createContainerSharingTask(context, ACTION_TYPE_SHARE, element, relations);
   await Promise.all([taskPromise, indexPromise]);
@@ -3092,43 +3094,55 @@ const buildEntityData = async (context, user, input, type, opts = {}) => {
 
 const createEntityRaw = async (context, user, input, type, opts = {}) => {
   // Region - Pre-Check
+  // 获取特定类型的实体的设置信息。这些设置信息包括实体的默认值、强制引用规则等。
   const entitySetting = await getEntitySettingFromCache(context, type);
+  // 填充默认值
   const filledInput = fillDefaultValues(user, input, entitySetting);
+  // 验证实体和关系的创建
   await validateEntityAndRelationCreation(context, user, filledInput, type, entitySetting, opts);
   // Endregion
   const { fromRule } = opts;
   // We need to check existing dependencies
+  // 解析输入对象中的引用字段
   const resolvedInput = await inputResolveRefs(context, user, filledInput, type, entitySetting);
   // Generate all the possibles ids
   // For marking def, we need to force the standard_id
+  // 从给定的输入数据中提取所有的ID
   const participantIds = getInputIds(type, resolvedInput, fromRule);
   // Create the element
   let lock;
   try {
     // Try to get the lock in redis
+    // 获取redis锁资源，以确保在执行特定操作期间，其他并发操作不能同时对同一资源进行修改或访问
     lock = await lockResource(participantIds);
     // Generate the internal id if needed
     const standardId = resolvedInput.standard_id || generateStandardId(type, resolvedInput);
     // Check if the entity exists, must be done with SYSTEM USER to really find it.
     const existingEntities = [];
+    // 根据给定的ID列表，在内部数据存储中查找对应的实体，会调用es查询
     const existingByIdsPromise = internalFindByIds(context, SYSTEM_USER, participantIds, { type });
     // Hash are per definition keys.
     // When creating a hash, we can check all hashes to update or merge the result
     // Generating multiple standard ids could be a solution but to complex to implements
     // For now, we will look for any observables that have any hashes of this input.
     let existingByHashedPromise = Promise.resolve([]);
+    // TODO: 可能要修改
     if (isStixCyberObservableHashedObservable(type)) {
+      // 根据给定的哈希值列表，在数据库中查询并返回匹配的实体对象列表
       existingByHashedPromise = listEntitiesByHashes(context, user, type, input.hashes);
       resolvedInput.update = true;
     }
     // Resolve the existing entity
     const [existingByIds, existingByHashed] = await Promise.all([existingByIdsPromise, existingByHashedPromise]);
+    // 合并通过id和hash找到的已经存在的匹配的实体列表并进行合并。
     existingEntities.push(...R.uniqBy((e) => e.internal_id, [...existingByIds, ...existingByHashed]));
     // If existing entities have been found and type is a STIX Core Object
     let dataEntity;
     if (existingEntities.length > 0) {
       // We need to filter what we found with the user rights
+      // 根据用户的权限过滤存储的实体元素
       const filteredEntities = await userFilterStoreElements(context, user, existingEntities);
+      // 将 filteredEntities 数组中的每个元素的 standard_id 属性的值提取出来，然后将这些值组成一个新的数组 entityIds
       const entityIds = R.map((i) => i.standard_id, filteredEntities);
       // If nothing accessible for this user, throw ForbiddenAccess
       if (filteredEntities.length === 0) {
@@ -3191,6 +3205,7 @@ const createEntityRaw = async (context, user, input, type, opts = {}) => {
         const sources = R.filter((e) => e.internal_id !== target.internal_id, filteredEntities);
         hashMergeValidation([target, ...sources]);
         await mergeEntities(context, user, target.internal_id, sources.map((s) => s.internal_id), { locks: participantIds });
+        // 将输入数据合并到现有实体中，然后通过调用createEntity或updateEntity函数来执行插入或更新操作
         return upsertElement(context, user, target, type, resolvedInput, { ...opts, locks: participantIds });
       }
       if (resolvedInput.stix_id && !existingEntities.map((n) => getInstanceIds(n)).flat().includes(resolvedInput.stix_id)) {
@@ -3201,12 +3216,16 @@ const createEntityRaw = async (context, user, input, type, opts = {}) => {
       throw UnsupportedError('Cant upsert entity. Too many entities resolved', { input, entityIds });
     } else {
       // Create the object
+      // 根据给定的实体类型和属性数据构建实体的数据对象
       dataEntity = await buildEntityData(context, user, resolvedInput, type, opts);
     }
     // Index the created element
+    // indexCreatedElement函数的作用是将创建的元素索引到Elasticsearch中。
+    // 它将创建的元素转换为适合索引的格式，并发送到Elasticsearch进行索引。这个函数通常在创建新的实体后被调用，以确保新创建的实体可以被快速搜索和查询。
     await indexCreatedElement(context, user, dataEntity);
     // Push the input in the stream
     const createdElement = { ...resolvedInput, ...dataEntity.element };
+    // 将创建的实体事件存储到redis中
     const event = await storeCreateEntityEvent(context, user, createdElement, dataEntity.message, opts);
     // Return created element after waiting for it.
     return { element: dataEntity.element, event, isCreation: true };

@@ -2126,6 +2126,7 @@ export const elBulk = async (args) => {
   });
 };
 /* istanbul ignore next */
+// 用于将文档批量地插入到Elasticsearch中
 export const elIndex = async (indexName, documentBody, refresh = true) => {
   const internalId = documentBody.internal_id;
   const entityType = documentBody.entity_type ? documentBody.entity_type : '';
@@ -2393,6 +2394,8 @@ const prepareIndexing = async (elements) => {
   }
   return preparedElements;
 };
+
+// 将给定的元素批量索引到Elasticsearch中，在数据库中创建或更新实体后，将实体的相关信息存储到Elasticsearch中以供快速搜索和查询。
 export const elIndexElements = async (context, user, message, elements) => {
   const elIndexElementsFn = async () => {
     // 00. Relations must be transformed before indexing.
