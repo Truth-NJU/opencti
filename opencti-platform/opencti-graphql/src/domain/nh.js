@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import {
-  createEntity,
+  createNHEntity,
 } from '../database/middleware';
 import { storeLoadById } from '../database/middleware-loader';
 import { BUS_TOPICS } from '../config/conf';
@@ -16,8 +16,8 @@ export const findById = (context, user, archId) => {
 
 // region mutations
 export const addArch = async (context, user, arch) => {
-  const finalArch = R.assoc('created', arch.published, arch);
+  // const finalArch = R.assoc('created', arch.published, arch);
   // 会在es中创建索引
-  const created = await createEntity(context, user, finalArch, ENTITY_TYPE_CONTAINER_ARCH);
+  const created = await createNHEntity(context, user, arch, ENTITY_TYPE_CONTAINER_ARCH);
   return notify(BUS_TOPICS[ABSTRACT_NH_OBJECT].ADDED_TOPIC, created, user);
 };

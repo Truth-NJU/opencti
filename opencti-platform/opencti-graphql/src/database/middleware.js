@@ -3250,6 +3250,20 @@ export const createEntity = async (context, user, input, type, opts = {}) => {
   }
   return isCompleteResult ? data : data.element;
 };
+
+
+export const createNHEntity = async (context, user, input, type, opts = {}) => {
+  const isCompleteResult = opts.complete === true;
+  // volumes of objects relationships must be controlled
+  const data = await createEntityRaw(context, user, input, type, opts);
+  // In case of creation, start an enrichment
+  if (data.isCreation) {
+    await createEntityAutoEnrichment(context, user, data.element.standard_id, type);
+  }
+  return isCompleteResult ? data : data.element;
+};
+
+
 export const createInferredEntity = async (context, input, ruleContent, type) => {
   const opts = {
     fromRule: ruleContent.field,

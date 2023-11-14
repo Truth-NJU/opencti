@@ -255,11 +255,13 @@ const schemaResolvers = [
   organizationOrIndividualResolvers,
   stixObjectOrStixRelationshipResolvers,
   stixObjectOrStixRelationshipOrCreatorResolvers,
+  archResolvers
 ];
 export const registerGraphqlSchema = ({ schema, resolver }) => {
   schemaTypeDefs.push(schema);
   schemaResolvers.push(resolver);
 };
+
 
 // 用于创建和返回一个GraphQL模式
 // GraphQL模式（schema）是一个定义了GraphQL API的类型系统的核心部分。它描述了API提供的数据结构和可用的查询操作。
@@ -270,6 +272,24 @@ const createSchema = () => {
   // 在GraphQL中，mergeResolvers方法用于合并多个解析器对象（schemaResolvers），以创建一个统一的解析器。
   // mergeResolvers方法接受一个或多个解析器对象作为参数，并将它们合并成一个单一的解析器对象。合并后的解析器对象将包含所有传入解析器对象中定义的查询、变更和订阅字段解析器。
   // 通过使用mergeResolvers方法，开发人员可以将多个不同的解析器对象组合在一起，以形成一个完整的解析器。这样可以方便地将不同的解析器逻辑组织在一起，使得整个GraphQL服务器的解析器逻辑更加清晰和可维护。
+  const { gql } = require("apollo-server-koa");
+  const typeDefs = gql`
+      type Arch {
+          title: String
+          author: String
+      }
+      input ArchInput {
+        title: String
+        author: String
+      }
+      type Query {
+          arch: Arch
+      }
+      type Mutation {
+          archAdd(input: ArchInput): Arch
+      }
+  `;
+  schemaTypeDefs.push(typeDefs);
   const resolvers = mergeResolvers(schemaResolvers);
   const { authDirectiveTransformer } = authDirectiveBuilder('auth');
   let schema = makeExecutableSchema({
