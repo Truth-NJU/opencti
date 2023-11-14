@@ -275,18 +275,15 @@ const createSchema = () => {
   const { gql } = require("apollo-server-koa");
   const typeDefs = gql`
       type Arch {
-          title: String
-          author: String
-      }
-      input ArchInput {
-        title: String
-        author: String
+        id: ID!
+        title: String!
+        author: String!
       }
       type Query {
-          arch: Arch
+        arch(id:ID!): Arch
       }
       type Mutation {
-          archAdd(input: ArchInput): Arch
+        archAdd(title: String!, author: String!): Arch
       }
   `;
   schemaTypeDefs.push(typeDefs);

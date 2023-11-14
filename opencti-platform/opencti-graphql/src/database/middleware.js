@@ -6,6 +6,7 @@ import { compareUnsorted } from 'js-deep-equals';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { JSONPath } from 'jsonpath-plus';
 import * as jsonpatch from 'fast-json-patch';
+import conf from '../config/conf';
 import {
   ALREADY_DELETED_ERROR,
   AlreadyDeletedError,
@@ -3240,6 +3241,40 @@ const createEntityRaw = async (context, user, input, type, opts = {}) => {
   }
 };
 
+export const ES_INDEX_PREFIX = conf.get('elasticsearch:index_prefix') || 'opencti';
+
+const buildNHEntityData = async (context, user, input, type, opts = {}) => {
+  let data = R.pipe(
+    R.assoc('_index', `${ES_INDEX_PREFIX}_nh_objects`),
+    R.assoc('entity_type', type)
+  )(input);
+  // Simply return the data
+  return {
+    isCreation: true,
+    element: data,
+    message: null,
+    previous: null,
+    relations: null, // Added meta relationships
+  };
+};
+
+const createNHEntityRaw = async (context, user, input, type, opts = {}) => {
+  let dataEntity;
+  // Create the object
+  // 根据给定的实体类型和属性数据构建实体的数据对象
+  dataEntity = await buildNHEntityData(context, user, input, type, opts);
+  // Index the created element
+  // indexCreatedElement函数的作用是将创建的元素索引到Elasticsearch中。
+  // 它将创建的元素转换为适合索引的格式，并发送到Elasticsearch进行索引。这个函数通常在创建新的实体后被调用，以确保新创建的实体可以被快速搜索和查询。
+  await indexCreatedElement(context, user, dataEntity);
+  // Push the input in the stream
+  // const createdElement = { ...input, ...dataEntity.element };
+  // // 将创建的实体事件存储到redis中
+  // const event = await storeCreateEntityEvent(context, user, createdElement, dataEntity.message, opts);
+  // Return created element after waiting for it.
+  return { element: dataEntity.element, isCreation: true };
+};
+
 export const createEntity = async (context, user, input, type, opts = {}) => {
   const isCompleteResult = opts.complete === true;
   // volumes of objects relationships must be controlled
@@ -3255,12 +3290,12 @@ export const createEntity = async (context, user, input, type, opts = {}) => {
 export const createNHEntity = async (context, user, input, type, opts = {}) => {
   const isCompleteResult = opts.complete === true;
   // volumes of objects relationships must be controlled
-  const data = await createEntityRaw(context, user, input, type, opts);
+  const data = await createNHEntityRaw(context, user, input, type, opts);
   // In case of creation, start an enrichment
-  if (data.isCreation) {
-    await createEntityAutoEnrichment(context, user, data.element.standard_id, type);
-  }
-  return isCompleteResult ? data : data.element;
+  // if (data.isCreation) {
+  //   await createEntityAutoEnrichment(context, user, data.element.standard_id, type);
+  // }
+  return data.element;
 };
 
 

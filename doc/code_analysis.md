@@ -43,30 +43,27 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 
    ```js
    const { gql } = require("apollo-server-koa");
-     const typeDefs = gql`
+   const typeDefs = gql`
          type Arch {
-             title: String
-             author: String
-         }
-         input ArchInput {
-           title: String
-           author: String
+           id: ID!
+           title: String!
+           author: String!
          }
          type Query {
-             arch: Arch
+           arch(id:ID!): Arch
          }
          type Mutation {
-             archAdd(input: ArchInput): Arch
+           archAdd(title: String!, author: String!): Arch
          }
      `;
-     schemaTypeDefs.push(typeDefs);
+   schemaTypeDefs.push(typeDefs);
    ```
-
+   
 5. 测试请求时可以使用如下语句在 http://localhost:3000/graphql 中进行测试
 
    ```bash
-   mutation{
-     archAdd{
+   mutation AddArch {
+     archAdd(title: "Harry Potter and the Chamber of Secrets", author: "J.K. Rowling") {
        title
        author
      }
