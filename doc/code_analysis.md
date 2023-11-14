@@ -29,7 +29,7 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 1. https://kylin.dev/2020/07/07/Apollo-GraphQL%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B-%E6%9C%8D%E5%8A%A1%E7%AB%AF/
 2. https://www.freecodecamp.org/chinese/news/a-detailed-guide-to-graphql/
 
-经过对源码的分析，想要新增自定义接口来导入数据，重点需要关注**schemaResolvers**。可以以opencti-graphql/src/resolvers/report.js为例来进行学习怎么编写代码。同时还需要把项目运行起来，看看前端如何向graphql发送请求。前端发送请求的方式可以看一下opencti-front/src/private/components/analyses/reports/ReportCreation.tsx的写法。
+经过对源码的分析，想要新增自定义接口来导入数据，重点需要关注**schemaResolvers**。可以以opencti-graphql/src/resolvers/report.js为例来进行学习怎么编写代码。
 
 1. 添加opencti-graphql/src/resolvers/nh.js以及opencti-graphql/src/domain/nh.js
 
@@ -58,8 +58,10 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
      `;
    schemaTypeDefs.push(typeDefs);
    ```
-   
-5. 测试请求时可以使用如下语句在 http://localhost:3000/graphql 中进行测试
+
+5. 修改opencti-graphql/src/resolvers/nh.js中addArch方法的实现为自定义实现，已经修改了一个版本，可以在代码中查看
+
+6. 测试mutation请求时可以使用如下语句在 http://localhost:3000/graphql 中进行测试，可以成功将这条数据插入es，在Multi Elasticsearch Head中可以查询到对应的数据。
 
    ```bash
    mutation AddArch {
@@ -70,11 +72,24 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
    }
    ```
 
-6. 修改opencti-graphql/src/resolvers/nh.js中findById和addArch方法的实现为自定义实现
+7. 修改opencti-graphql/src/resolvers/nh.js中arch方法的实现为自定义实现，通过数据id查询数据的完整信息**[todo]**
+
+8. 测试query请求时可以使用如下语句在 http://localhost:3000/graphql 中进行测试。
+
+   ```bash
+   query Arch {
+     arch(id: "K7EJzYsBONtznA21h2Zn") {
+       title
+       author
+     }
+   }
+   ```
+
+9. 
 
 ## 2.1 利用postman发送graphql请求进行测试
 
-请求网址：http://localhost:3000/graphql，请求为post。
+请求网址：http://localhost:3000/graphql ，请求为post。
 
 在[个人配置](http://localhost:3000/dashboard/profile/me)中找到api访问中的REQUIRED HEADERS，添加到postman的Headers中。
 
@@ -83,3 +98,9 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 ```json
 {"id":"ReportCreationMutation","query":"mutation ReportCreationMutation(\n  $input: ReportAddInput!\n) {\n  reportAdd(input: $input) {\n    id\n    standard_id\n    name\n    description\n    entity_type\n    parent_types\n    ...ReportLine_node\n  }\n}\n\nfragment ReportLine_node on Report {\n  id\n  entity_type\n  name\n  description\n  published\n  report_types\n  createdBy {\n    __typename\n    __isIdentity: __typename\n    id\n    name\n    entity_type\n  }\n  objectMarking {\n    edges {\n      node {\n        id\n        definition_type\n        definition\n        x_opencti_order\n        x_opencti_color\n      }\n    }\n  }\n  objectLabel {\n    edges {\n      node {\n        id\n        value\n        color\n      }\n    }\n  }\n  creators {\n    id\n    name\n  }\n  status {\n    id\n    order\n    template {\n      name\n      color\n      id\n    }\n  }\n  workflowEnabled\n  created_at\n}\n","variables":{"input":{"name":"测试","description":"测试","content":"<p>测试</p>","published":"2023-11-10T14:19:24+08:00","confidence":75,"report_types":["internal-report"],"x_opencti_reliability":"A - Completely reliable","objectMarking":[],"objectAssignee":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectParticipant":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectLabel":[],"externalReferences":[]}}}
 ```
+
+## 2.2 elasticsearch-head 
+
+在chrome浏览器中安装 [Multi Elasticsearch Head](https://chromewebstore.google.com/detail/cpmmilfkofbeimbmgiclohpodggeheim) ，使用Multi Elasticsearch Head即可可视化查看ES中的数据，可以用来验证代码的正确性。
+
+![3](./img/es-head.png)

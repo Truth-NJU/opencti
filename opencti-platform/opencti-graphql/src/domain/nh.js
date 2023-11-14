@@ -3,13 +3,14 @@ import {
   createNHEntity,
 } from '../database/middleware';
 import { storeLoadById } from '../database/middleware-loader';
-import { BUS_TOPICS } from '../config/conf';
+import { BUS_TOPICS, logApp } from '../config/conf';
 import { notify } from '../database/redis';
 import { ENTITY_TYPE_CONTAINER_ARCH } from '../schema/stixDomainObject';
 import {
   ABSTRACT_NH_OBJECT} from '../schema/general';
 
 export const findById = (context, user, archId) => {
+  logApp.info(`[NH] Find by id [${archId}]`);
   // 通过es查询
   return storeLoadById(context, user, archId, ENTITY_TYPE_CONTAINER_ARCH);
 };

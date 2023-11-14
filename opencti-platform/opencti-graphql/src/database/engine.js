@@ -1135,6 +1135,7 @@ export const elFindByFromAndTo = async (context, user, fromId, toId, relationshi
 };
 // 根据给定的ID列表查找相关的数据。它接受一个ID列表作为参数，并使用这些ID来执行查询操作。查询结果将返回与这些ID对应的数据。
 export const elFindByIds = async (context, user, ids, opts = {}) => {
+  logApp.info(`[NH-ES] Find by id [${ids[0]}]`);
   const { indices = READ_DATA_INDICES, baseData = false, baseFields = BASE_FIELDS } = opts;
   const { withoutRels = false, onRelationship = null, toMap = false, mapWithAllIds = false, type = null, forceAliases = false } = opts;
   const idsArray = Array.isArray(ids) ? ids : [ids];

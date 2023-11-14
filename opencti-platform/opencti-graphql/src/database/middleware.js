@@ -239,6 +239,7 @@ import { telemetry } from '../config/tracing';
 import { cleanMarkings, handleMarkingOperations } from '../utils/markingDefinition-utils';
 import { generateCreateMessage, generateUpdateMessage } from './generate-message';
 import { confidence } from '../schema/attribute-definition';
+import { debug } from 'winston';
 
 // region global variables
 const MAX_BATCH_SIZE = 300;
@@ -3267,6 +3268,9 @@ const createNHEntityRaw = async (context, user, input, type, opts = {}) => {
   // indexCreatedElement函数的作用是将创建的元素索引到Elasticsearch中。
   // 它将创建的元素转换为适合索引的格式，并发送到Elasticsearch进行索引。这个函数通常在创建新的实体后被调用，以确保新创建的实体可以被快速搜索和查询。
   await indexCreatedElement(context, user, dataEntity);
+  for(let key in dataEntity.element){ 
+    logApp.info(`[NH] ${key}:${dataEntity.element[key]}`);
+  }
   // Push the input in the stream
   // const createdElement = { ...input, ...dataEntity.element };
   // // 将创建的实体事件存储到redis中
