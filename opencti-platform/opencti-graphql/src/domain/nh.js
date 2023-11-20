@@ -16,12 +16,20 @@ export const findById = (context, user, archId) => {
 };
 
 // region mutations
-export const addArch = async (context, user,  title, author) => {
+// export const addArch = async (context, user,  title, author) => {
+//   // const finalArch = R.assoc('created', arch.published, arch);
+//   const arch= {
+//     "title": title,
+//     "author": author
+//   }
+//   // 会在es中创建索引
+//   const created = await createNHEntity(context, user, arch, ENTITY_TYPE_CONTAINER_ARCH);
+//   return arch;
+// };
+
+export const addArch = async (context, user,  input) => {
   // const finalArch = R.assoc('created', arch.published, arch);
-  const arch= {
-    "title": title,
-    "author": author
-  }
+  const arch= input
   // 会在es中创建索引
   const created = await createNHEntity(context, user, arch, ENTITY_TYPE_CONTAINER_ARCH);
   return arch;

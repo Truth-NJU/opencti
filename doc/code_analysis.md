@@ -39,35 +39,281 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 
    ![2](./img/error.png)
 
-4. 终端运行`cnpm install apollo-server-koa koa`安装koa相关的依赖，暂时直接在 opencti-graphql/src/graphql/schema.js/createSchema 方法中添加如下代码。写法有待验证是否正确。
+4. 终端运行`cnpm install apollo-server-koa koa`安装koa相关的依赖，在 opencti-graphql/src/graphql/schema.js中添加如下代码。
 
    ```js
-   const { gql } = require("apollo-server-koa");
-   const typeDefs = gql`
+   // 最终写法
+   const archDefs = gql`
          type Arch {
-           id: ID!
-           title: String!
-           author: String!
+           tm: String!
+           ym: String!
+           zzyuanm: String!
+           zzyim: String!
+           bzyuanm: String!
+           bzyim: String!
+           yzyuanm: String!
+           yzyim: String!
+           gjc: String!
+           lh1: String!
+           lh2: String!
+           lh3: String!
+           zwzy: String!
+           wwzy: String!
+           mc: String!
+           cb: String!
+           pf: String!
+           xltm: String!
+           fz: String!
+           zzjg: String!
+           cbd: String!
+           cbjg: String!
+           bc: String!
+           bh: String!
+           ysjg: String!
+           cbrq: String!
+           cjrq: String!
+           ysrq: String!
+           chrq: String!
+           fxrq: String!
+           isbn: String!
+           issn: String!
+           isrc: String!
+           csbh: String!
+           hf: String!
+           secai: String!
+           cc: String!
+           sc: String!
+           qsy: String!
+           gcd: String!
+           url: String!
+           hymc: String!
+           km: String!
+           qs: String!
+           yz: String!
+           dm: String!
+           gb: String!
+           xwmc: String!
+           xkzy: String!
+           ds: String!
+           xwsydw: String!
+           blc: String!
+           tkfw: String!
+           fbjg: String!
+           pzjg: String!
+           qt1: String!
+           qt2: String!
+           yema: String!
+           pdf: String!
+           txt: String!
+           bz: String!
+         }
+         input ArchInput{
+           tm: String!
+           ym: String!
+           zzyuanm: String!
+           zzyim: String!
+           bzyuanm: String!
+           bzyim: String!
+           yzyuanm: String!
+           yzyim: String!
+           gjc: String!
+           lh1: String!
+           lh2: String!
+           lh3: String!
+           zwzy: String!
+           wwzy: String!
+           mc: String!
+           cb: String!
+           pf: String!
+           xltm: String!
+           fz: String!
+           zzjg: String!
+           cbd: String!
+           cbjg: String!
+           bc: String!
+           bh: String!
+           ysjg: String!
+           cbrq: String!
+           cjrq: String!
+           ysrq: String!
+           chrq: String!
+           fxrq: String!
+           isbn: String!
+           issn: String!
+           isrc: String!
+           csbh: String!
+           hf: String!
+           secai: String!
+           cc: String!
+           sc: String!
+           qsy: String!
+           gcd: String!
+           url: String!
+           hymc: String!
+           km: String!
+           qs: String!
+           yz: String!
+           dm: String!
+           gb: String!
+           xwmc: String!
+           xkzy: String!
+           ds: String!
+           xwsydw: String!
+           blc: String!
+           tkfw: String!
+           fbjg: String!
+           pzjg: String!
+           qt1: String!
+           qt2: String!
+           yema: String!
+           pdf: String!
+           txt: String!
+           bz: String!
          }
          type Query {
            arch(id:ID!): Arch
          }
          type Mutation {
-           archAdd(title: String!, author: String!): Arch
+           archAdd(input: ArchInput): Arch
          }
      `;
-   schemaTypeDefs.push(typeDefs);
    ```
 
 5. 修改opencti-graphql/src/resolvers/nh.js中addArch方法的实现为自定义实现，已经修改了一个版本，可以在代码中查看
 
 6. 测试mutation请求时可以使用如下语句在 http://localhost:3000/graphql 中进行测试，可以成功将这条数据插入es，在Multi Elasticsearch Head中可以查询到对应的数据。
 
-   ```bash
-   mutation AddArch {
-     archAdd(title: "Harry Potter and the Chamber of Secrets", author: "J.K. Rowling") {
-       title
-       author
+   ```js
+   // 最终写法：
+   mutation UpdateUser($input: ArchInput!) {
+     archAdd(input: $input) {
+       tm
+       ym
+       zzyuanm
+       zzyim
+       bzyuanm
+       bzyim
+     	yzyuanm
+       yzyim
+       gjc
+       lh1
+       lh2
+       lh3
+       zwzy
+       wwzy
+       mc
+       cb
+       pf
+       xltm
+       fz
+       zzjg
+       cbd
+       cbjg
+       bc
+       bh
+       ysjg
+       cbrq
+       cjrq
+       ysrq
+       chrq
+       fxrq
+       isbn
+       issn
+       isrc
+       csbh
+       hf
+       secai
+       cc
+       sc
+       qsy
+       gcd
+       url
+       hymc
+       km
+     	qs
+       yz
+       dm
+       gb
+       xwmc
+       xkzy
+       ds
+       xwsydw
+       blc
+       tkfw
+       fbjg
+       pzjg
+       qt1
+       qt2
+       yema
+       pdf
+       txt
+       bz
+     }
+   }
+   // query variables
+   {
+     "input": {
+      	"tm": "南海北部陆缘东部陆坡的蒸发盐沉积",
+       "ym":"EXPLORATIONONTHEEVAPORATESEDIMENTINTHESLOPEOFTHENORTHERNMARGINOFTHESOUTHCHINASEA",
+       "zzyuanm":"姚伯初",
+       "zzyim":"YAOBochu",
+       "bzyuanm":"",
+       "bzyim":"",
+     	"yzyuanm":"",
+       "yzyim":"",
+       "gjc":"南海北部陆缘东部陆坡;层速度;变形沉积;蒸发盐;海底扩张初始阶段沉积环境;大陆张裂;陆块分离;海底扩张;地震反射剖面",
+       "lh1":"A0104",
+       "lh2":"",
+       "lh3":"",
+       "zwzy":"在南海北部陆缘东部、台湾浅滩以南的陆坡上,海底水深1000～3000m,海底坡度较小,平均8.6×10-3。从穿过这里的地震剖面上看,新生代早期(晚渐新世)有一套沉积(T7—T8)发生过强烈变形,其内部无反射,只有杂乱的噪声。从地震声纳浮标探测的结果看,这套沉积的层速度为4.98km/s。由于这套沉积的变形,使上覆沉积也发生了变形。将这套沉积和大西洋边缘的蒸发盐沉积对比,发现其反射特征和层速度极为相似。因此,推测它为发生在海底扩张初期的蒸发盐沉积。",
+       "wwzy":"　IntheeasternpartofthenorthernmarginoftheSouthChinaSea(fromtheslopetothesouthofTai-wanShoal),thewaterdepthoftheseaisvaryingfrom1000mto3000m,andthegradientoftheseaflooris8.6×10-3onanaverage.Fromtheseismicprofilescrossingtheslopewecanseethatthereareasetofintensivelydeformedsediments(T7-T8)whoseageislateOligocene.Andtherearenoreflectionsbutonlymixedinterferenceinitsinterior.Theintervalvelocityis4.98km/saccordingtothesonobuoymeasure-ment.TheoverlyingsedimentsaredeformedasintensivelyasthesedimentsofT7-T8.Comparingthesedi-mentswiththeevaporateontheAtlanticmarginswefoundthatthereflectioncharactersandintervalve-locityareverysimilar.Therefore,webelievethatthesedimentsofT7-T8maybeevaporateandwerede-positedintheinitialstageoftheseafloorspreading,thatis,thelateOligocene.",
+       "mc":"",
+       "cb":"",
+       "pf":"",
+       "xltm":"",
+       "fz":"",
+       "zzjg":"国土资源部 广州海洋地质调查局",
+       "cbd":"",
+       "cbjg":"",
+       "bc":"",
+       "bh":"",
+       "ysjg":"",
+       "cbrq":"",
+       "cjrq":"",
+       "ysrq":"",
+       "chrq":"",
+       "fxrq":"",
+       "isbn":"",
+       "issn":"",
+       "isrc":"",
+       "csbh":"",
+       "hf":"",
+       "secai":"",
+       "cc":"",
+       "sc":"",
+       "qsy":"",
+       "gcd":"",
+       "url":"",
+       "hymc":"",
+       "km":"",
+     	"qs":"",
+       "yz":"中文",
+       "dm":"",
+       "gb":"",
+       "xwmc":"",
+       "xkzy":"",
+       "ds":"",
+       "xwsydw":"",
+       "blc":"",
+       "tkfw":"",
+       "fbjg":"",
+       "pzjg":"",
+       "qt1":"",
+       "qt2":"",
+       "yema":"",
+       "pdf":"",
+       "txt":"",
+       "bz":"测试使用"
      }
    }
    ```
@@ -84,8 +330,6 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
      }
    }
    ```
-
-9. 
 
 ## 2.1 利用postman发送graphql请求进行测试
 

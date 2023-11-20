@@ -7,8 +7,11 @@ import {
     Query: {
       arch: (_, { id }, context) => findById(context, context.user, id),
     },
+    // Mutation: {
+    //   archAdd: (_, { title, author }, context) => addArch(context, context.user, title, author),
+    // },
     Mutation: {
-      archAdd: (_, { title, author }, context) => addArch(context, context.user, title, author),
+      archAdd: (_, { input }, context) => addArch(context, context.user, input),
     },
   };
   

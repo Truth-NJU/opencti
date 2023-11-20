@@ -215,7 +215,6 @@ const schemaResolvers = [
   observedDataResolvers,
   opinionResolvers,
   reportResolvers,
-  archResolvers,
   courseOfActionResolvers,
   // Identities
   identityResolvers,
@@ -262,6 +261,158 @@ export const registerGraphqlSchema = ({ schema, resolver }) => {
   schemaResolvers.push(resolver);
 };
 
+const registerNHGraphqlSchema = () => {
+  const { gql } = require("apollo-server-koa");
+  // const typeDefs = gql`
+  //     type Arch {
+  //       id: ID!
+  //       title: String!
+  //       author: String!
+  //     }
+  //     type Query {
+  //       arch(id:ID!): Arch
+  //     }
+  //     type Mutation {
+  //       archAdd(title: String!, author: String!): Arch
+  //     }
+  // `;
+  const archDefs = gql`
+      type Arch {
+        tm: String!
+        ym: String!
+        zzyuanm: String!
+        zzyim: String!
+        bzyuanm: String!
+        bzyim: String!
+        yzyuanm: String!
+        yzyim: String!
+        gjc: String!
+        lh1: String!
+        lh2: String!
+        lh3: String!
+        zwzy: String!
+        wwzy: String!
+        mc: String!
+        cb: String!
+        pf: String!
+        xltm: String!
+        fz: String!
+        zzjg: String!
+        cbd: String!
+        cbjg: String!
+        bc: String!
+        bh: String!
+        ysjg: String!
+        cbrq: String!
+        cjrq: String!
+        ysrq: String!
+        chrq: String!
+        fxrq: String!
+        isbn: String!
+        issn: String!
+        isrc: String!
+        csbh: String!
+        hf: String!
+        secai: String!
+        cc: String!
+        sc: String!
+        qsy: String!
+        gcd: String!
+        url: String!
+        hymc: String!
+        km: String!
+        qs: String!
+        yz: String!
+        dm: String!
+        gb: String!
+        xwmc: String!
+        xkzy: String!
+        ds: String!
+        xwsydw: String!
+        blc: String!
+        tkfw: String!
+        fbjg: String!
+        pzjg: String!
+        qt1: String!
+        qt2: String!
+        yema: String!
+        pdf: String!
+        txt: String!
+        bz: String!
+      }
+      input ArchInput{
+        tm: String!
+        ym: String!
+        zzyuanm: String!
+        zzyim: String!
+        bzyuanm: String!
+        bzyim: String!
+        yzyuanm: String!
+        yzyim: String!
+        gjc: String!
+        lh1: String!
+        lh2: String!
+        lh3: String!
+        zwzy: String!
+        wwzy: String!
+        mc: String!
+        cb: String!
+        pf: String!
+        xltm: String!
+        fz: String!
+        zzjg: String!
+        cbd: String!
+        cbjg: String!
+        bc: String!
+        bh: String!
+        ysjg: String!
+        cbrq: String!
+        cjrq: String!
+        ysrq: String!
+        chrq: String!
+        fxrq: String!
+        isbn: String!
+        issn: String!
+        isrc: String!
+        csbh: String!
+        hf: String!
+        secai: String!
+        cc: String!
+        sc: String!
+        qsy: String!
+        gcd: String!
+        url: String!
+        hymc: String!
+        km: String!
+        qs: String!
+        yz: String!
+        dm: String!
+        gb: String!
+        xwmc: String!
+        xkzy: String!
+        ds: String!
+        xwsydw: String!
+        blc: String!
+        tkfw: String!
+        fbjg: String!
+        pzjg: String!
+        qt1: String!
+        qt2: String!
+        yema: String!
+        pdf: String!
+        txt: String!
+        bz: String!
+      }
+      type Query {
+        arch(id:ID!): Arch
+      }
+      type Mutation {
+        archAdd(input: ArchInput): Arch
+      }
+  `;
+  schemaTypeDefs.push(archDefs);
+  schemaResolvers.push(archResolvers);
+};
 
 // 用于创建和返回一个GraphQL模式
 // GraphQL模式（schema）是一个定义了GraphQL API的类型系统的核心部分。它描述了API提供的数据结构和可用的查询操作。
@@ -272,21 +423,7 @@ const createSchema = () => {
   // 在GraphQL中，mergeResolvers方法用于合并多个解析器对象（schemaResolvers），以创建一个统一的解析器。
   // mergeResolvers方法接受一个或多个解析器对象作为参数，并将它们合并成一个单一的解析器对象。合并后的解析器对象将包含所有传入解析器对象中定义的查询、变更和订阅字段解析器。
   // 通过使用mergeResolvers方法，开发人员可以将多个不同的解析器对象组合在一起，以形成一个完整的解析器。这样可以方便地将不同的解析器逻辑组织在一起，使得整个GraphQL服务器的解析器逻辑更加清晰和可维护。
-  const { gql } = require("apollo-server-koa");
-  const typeDefs = gql`
-      type Arch {
-        id: ID!
-        title: String!
-        author: String!
-      }
-      type Query {
-        arch(id:ID!): Arch
-      }
-      type Mutation {
-        archAdd(title: String!, author: String!): Arch
-      }
-  `;
-  schemaTypeDefs.push(typeDefs);
+  registerNHGraphqlSchema();
   const resolvers = mergeResolvers(schemaResolvers);
   const { authDirectiveTransformer } = authDirectiveBuilder('auth');
   let schema = makeExecutableSchema({
