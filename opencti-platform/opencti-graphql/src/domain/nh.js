@@ -3,6 +3,7 @@ import {
   createNHEntity,
 } from '../database/middleware';
 import { storeLoadById } from '../database/middleware-loader';
+import { elRawNHSearch,elRawDeleteByQuery } from '../database/engine';
 import { BUS_TOPICS, logApp } from '../config/conf';
 import { notify } from '../database/redis';
 import { ENTITY_TYPE_CONTAINER_ARCH } from '../schema/stixDomainObject';
@@ -13,6 +14,35 @@ export const findById = (context, user, archId) => {
   logApp.info(`[NH] Find by id [${archId}]`);
   // 通过es查询
   return storeLoadById(context, user, archId, ENTITY_TYPE_CONTAINER_ARCH);
+};
+
+export const findAllArchs = (context, user, indexName) => {
+  const query = {
+    index: indexName,
+    body: {
+      query: {
+        match_all: {} // 查询索引下的所有的文档
+      }
+    }
+  };
+  logApp.info(`[NH] Find all archs [${indexName}]`);
+  // 通过es查询
+  return elRawNHSearch(context, user, 'NH Archive', query);
+};
+
+
+export const deleteArch = (context, user, indexName) => {
+  const query = {
+    index: indexName,
+    body: {
+      query: {
+        match_all: {} // 查询索引下的所有的文档
+      }
+    }
+  };
+  logApp.info(`[NH] delete all archs under [${indexName}]`);
+  // 通过es查询
+  return elRawDeleteByQuery(query);
 };
 
 // region mutations

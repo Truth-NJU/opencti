@@ -405,9 +405,11 @@ const registerNHGraphqlSchema = () => {
       }
       type Query {
         arch(id:ID!): Arch
+        allArchs(indexName: String!): Arch
       }
       type Mutation {
         archAdd(input: ArchInput): Arch
+        archDelete(indexName: String!): null
       }
   `;
   schemaTypeDefs.push(archDefs);

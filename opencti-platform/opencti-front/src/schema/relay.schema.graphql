@@ -8439,6 +8439,7 @@ type Query {
   csvMappers(first: Int, after: ID, orderBy: CsvMapperOrdering, orderMode: OrderingMode, filters: [CsvMapperFiltering!], filterMode: FilterMode, search: String): CsvMapperConnection
   csvMapperTest(configuration: String!, content: String!): JSON
   arch(id: ID!): Arch
+  allArchs(indexName: String!): Arch
 }
 
 type Subscription {
@@ -9180,6 +9181,7 @@ type Mutation {
   csvMapperDelete(id: ID!): ID
   csvMapperFieldPatch(id: ID!, input: [EditInput!]!): CsvMapper
   archAdd(input: ArchInput): Arch
+  archDelete(indexName: String!): Arch
 }
 
 type Channel implements BasicObject & StixObject & StixCoreObject & StixDomainObject {
