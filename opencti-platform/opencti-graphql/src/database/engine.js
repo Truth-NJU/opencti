@@ -259,31 +259,14 @@ export const elRawSearch = (context, user, types, query) => {
   }, elRawSearchFn);
 };
 
-export const elRawNHSearch = (context, user, types, query) => {
-  const elRawSearchFn = async () => engine.search(query).then((r) => {
-    const parsedSearch = oebp(r);
-    // If some shards fail
-    if (parsedSearch._shards.failed > 0) {
-      // We need to filter "No mapping found" errors that are not real problematic shard problems
-      // As we do not define all mappings and let elastic create it dynamically at first creation
-      // This failure is transient until the first creation of some data
-      const failures = (parsedSearch._shards.failures ?? [])
-        .filter((f) => !f.reason?.reason.includes(NO_MAPPING_FOUND_ERROR));
-      if (failures.length > ES_MAX_SHARDS_FAILURE) {
-        // We do not support response with shards failure.
-        // Result must be always accurate to prevent data duplication and unwanted behaviors
-        // If any shard fail during query, engine throw a lock exception with shards information
-        throw EngineShardsError({ shards: parsedSearch._shards });
-      } else if (failures.length > 0) {
-        // At least log the situation
-        const message = `[SEARCH] Search meet ${failures.length} shards failure, please check your configuration`;
-        logApp.error(message, { shards: parsedSearch._shards });
-      }
+export const elRawNHSearch = (query) => {
+  engine.search(query).then((r) => {
+    const result = oebp(r);
+    for(var i=0;i<result.hits.hits.length;i++){
+      logApp.info(`[NH] Find all archs result: ${Object.values(result.hits.hits[i])}`);
     }
-    // Return result of the search if everything goes well
-    return parsedSearch;
+    return result.hits.hits;
   });
-  return elRawSearchFn;
 };
 
 // 它使用engine.deleteByQuery方法根据提供的查询删除数据，然后返回调用oebp函数并传入被删除的数据的结果

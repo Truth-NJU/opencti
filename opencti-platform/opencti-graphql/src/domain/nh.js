@@ -27,7 +27,7 @@ export const findAllArchs = (context, user, indexName) => {
   };
   logApp.info(`[NH] Find all archs [${indexName}]`);
   // 通过es查询
-  return elRawNHSearch(context, user, 'NH Archive', query);
+  return elRawNHSearch(query);
 };
 
 
@@ -42,7 +42,11 @@ export const deleteArch = (context, user, indexName) => {
   };
   logApp.info(`[NH] delete all archs under [${indexName}]`);
   // 通过es查询
-  return elRawDeleteByQuery(query);
+  elRawDeleteByQuery(query);
+  let ArchDelete = {
+    indexName: indexName,
+  }
+  return  ArchDelete;
 };
 
 // region mutations
