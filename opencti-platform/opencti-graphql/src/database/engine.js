@@ -175,7 +175,7 @@ export const searchEngineVersion = async () => {
   const searchInfo = await engine.info()
     .then((info) => oebp(info).version)
     .catch(
-      /* istanbul ignore next */ (e) => {
+      /* istanbul ignore next */(e) => {
         throw ConfigurationError('[SEARCH] Search engine seems down', { error: e.message });
       }
     );
@@ -260,13 +260,18 @@ export const elRawSearch = (context, user, types, query) => {
 };
 
 export const elRawNHSearch = (query) => {
-  engine.search(query).then((r) => {
+  const elRawSearchFn = engine.search(query).then((r) => {
     const result = oebp(r);
-    for(var i=0;i<result.hits.hits.length;i++){
-      logApp.info(`[NH] Find all archs result: ${Object.values(result.hits.hits[i])}`);
+    // logApp.info(`[NH] Find all archs result's length is ${result.hits.hits.length}`);
+    const archs = [];
+    for (var i = 0; i < result.hits.hits.length; i++) {
+      archs.push(result.hits.hits[i]['_source']);
+      // logApp.info(`[NH] Find all archs result: ${Object.keys(result.hits.hits[i]['_source'])}`);
+      // logApp.info(`[NH] Find all archs result: ${Object.values(result.hits.hits[i]['_source'])}`);
     }
-    return result.hits.hits;
+    return archs;
   });
+  return elRawSearchFn;
 };
 
 // 它使用engine.deleteByQuery方法根据提供的查询删除数据，然后返回调用oebp函数并传入被删除的数据的结果
@@ -513,7 +518,8 @@ const elCreateLifecyclePolicy = async () => {
             priority: 100
           }
         }
-      } }).catch((e) => {
+      }
+    }).catch((e) => {
       throw DatabaseError('[SEARCH] Error creating lifecycle policy', { error: e });
     });
   }
@@ -1145,7 +1151,7 @@ export const elFindByFromAndTo = async (context, user, fromId, toId, relationshi
 };
 // 根据给定的ID列表查找相关的数据。它接受一个ID列表作为参数，并使用这些ID来执行查询操作。查询结果将返回与这些ID对应的数据。
 export const elFindByIds = async (context, user, ids, opts = {}) => {
-  logApp.info(`[NH-ES] Find by id [${ids[0]}]`);
+  // logApp.info(`[NH-ES] Find by id [${ids[0]}]`);
   const { indices = READ_DATA_INDICES, baseData = false, baseFields = BASE_FIELDS } = opts;
   const { withoutRels = false, onRelationship = null, toMap = false, mapWithAllIds = false, type = null, forceAliases = false } = opts;
   const idsArray = Array.isArray(ids) ? ids : [ids];
@@ -2017,7 +2023,7 @@ export const elPaginate = async (context, user, indexName, options = {}) => {
       return convertedHits;
     })
     .catch(
-      /* istanbul ignore next */ (err) => {
+      /* istanbul ignore next */(err) => {
         // Because we create the mapping at element creation
         // We log the error only if its not a mapping not found error
         let isTechnicalError = true;

@@ -8439,7 +8439,7 @@ type Query {
   csvMappers(first: Int, after: ID, orderBy: CsvMapperOrdering, orderMode: OrderingMode, filters: [CsvMapperFiltering!], filterMode: FilterMode, search: String): CsvMapperConnection
   csvMapperTest(configuration: String!, content: String!): JSON
   arch(id: ID!): Arch
-  allArchs(indexName: String!): Arch
+  allArchs(indexName: String!): [Arch]
 }
 
 type Subscription {
