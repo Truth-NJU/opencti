@@ -348,3 +348,7 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 在chrome浏览器中安装 [Multi Elasticsearch Head](https://chromewebstore.google.com/detail/cpmmilfkofbeimbmgiclohpodggeheim) ，使用Multi Elasticsearch Head即可可视化查看ES中的数据，可以用来验证代码的正确性。
 
 ![3](./img/es-head.png)
+
+## 2.3 前后端交互
+
+目前自定义的前端在访问opencti的后台数据时，请求时发送到localhost:3000/graphql中的，因此opencti的前后端都需要启动才能正常访问。
