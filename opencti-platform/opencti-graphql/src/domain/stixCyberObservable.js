@@ -360,6 +360,7 @@ export const artifactImport = async (context, user, args) => {
   const { createReadStream, filename, mimetype } = await file;
   const targetId = uuidv4();
   const filePath = `import/${ENTITY_HASHED_OBSERVABLE_ARTIFACT}/${targetId}`;
+  logApp.info('[OPENCTI] Importing artifact', { filename, mimetype, targetId, filePath });
   const version = now();
   const artifactData = {
     internal_id: targetId,

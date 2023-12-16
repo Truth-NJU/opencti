@@ -24,6 +24,8 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 
 # 2. OpenCTI源码修改
 
+## 2.1 文本数据上传
+
 **参考链接：**
 
 1. https://kylin.dev/2020/07/07/Apollo-GraphQL%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B-%E6%9C%8D%E5%8A%A1%E7%AB%AF/
@@ -331,7 +333,16 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
    }
    ```
 
-## 2.1 利用postman发送graphql请求进行测试
+## 2.2 文件上传
+
+### 2.2.1 源代码示例
+
+1. 文件上传调用的是src/database/file-storage.js下的upload方法。在opencti-platform/opencti-graphql/src/resolvers/stixCoreObject.js中使用了stixCoreObjectImportPush方法，该方法会调用upload方法来上传文件。
+2. 上传后的文件会存储到minio S3存储桶中，也就是docker的minio镜像中的data/opencti-bucket/import/report目录下<img src="./img/minio.png" alt="img" style="zoom:60%;" />
+
+# 3. 工具使用
+
+## 3.1 利用postman发送graphql请求进行测试
 
 请求网址：http://localhost:3000/graphql ，请求为post。
 
@@ -343,12 +354,12 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 {"id":"ReportCreationMutation","query":"mutation ReportCreationMutation(\n  $input: ReportAddInput!\n) {\n  reportAdd(input: $input) {\n    id\n    standard_id\n    name\n    description\n    entity_type\n    parent_types\n    ...ReportLine_node\n  }\n}\n\nfragment ReportLine_node on Report {\n  id\n  entity_type\n  name\n  description\n  published\n  report_types\n  createdBy {\n    __typename\n    __isIdentity: __typename\n    id\n    name\n    entity_type\n  }\n  objectMarking {\n    edges {\n      node {\n        id\n        definition_type\n        definition\n        x_opencti_order\n        x_opencti_color\n      }\n    }\n  }\n  objectLabel {\n    edges {\n      node {\n        id\n        value\n        color\n      }\n    }\n  }\n  creators {\n    id\n    name\n  }\n  status {\n    id\n    order\n    template {\n      name\n      color\n      id\n    }\n  }\n  workflowEnabled\n  created_at\n}\n","variables":{"input":{"name":"测试","description":"测试","content":"<p>测试</p>","published":"2023-11-10T14:19:24+08:00","confidence":75,"report_types":["internal-report"],"x_opencti_reliability":"A - Completely reliable","objectMarking":[],"objectAssignee":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectParticipant":["88ec0c6a-13ce-5e39-b486-354fe4a7084f"],"objectLabel":[],"externalReferences":[]}}}
 ```
 
-## 2.2 elasticsearch-head 
+## 3.2 elasticsearch-head 
 
 在chrome浏览器中安装 [Multi Elasticsearch Head](https://chromewebstore.google.com/detail/cpmmilfkofbeimbmgiclohpodggeheim) ，使用Multi Elasticsearch Head即可可视化查看ES中的数据，可以用来验证代码的正确性。
 
 ![3](./img/es-head.png)
 
-## 2.3 前后端交互
+## 3.3 前后端交互
 
 目前自定义的前端在访问opencti的后台数据时，请求时发送到localhost:3000/graphql中的，因此opencti的前后端都需要启动才能正常访问。

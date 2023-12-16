@@ -13,7 +13,7 @@ import {
 import { internalLoadById, listEntities, storeLoadById } from '../database/middleware-loader';
 import { findAll as relationFindAll } from './stixCoreRelationship';
 import { delEditContext, lockResource, notify, setEditContext, storeUpdateEvent } from '../database/redis';
-import { BUS_TOPICS } from '../config/conf';
+import { BUS_TOPICS, logApp } from '../config/conf';
 import { FunctionalError, LockTimeoutError, TYPE_LOCK_ERROR, UnsupportedError } from '../config/errors';
 import { isStixCoreObject, stixCoreObjectOptions } from '../schema/stixCoreObject';
 import {
@@ -398,6 +398,7 @@ export const stixCoreObjectImportPush = async (context, user, id, file, noTrigge
     const entitySetting = await getEntitySettingFromCache(context, previous.entity_type);
     const isAutoExternal = !entitySetting ? false : entitySetting.platform_entity_files_ref;
     const filePath = `import/${previous.entity_type}/${internalId}`;
+    logApp.info('[FILE STORAGE] stixCoreObjectImportPush Import file', { user_id: user.id, path: filePath, filename });
     // 01. Upload the file
     const meta = {};
     if (isAutoExternal) {

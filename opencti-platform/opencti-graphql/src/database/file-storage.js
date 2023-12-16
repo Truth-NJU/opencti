@@ -56,6 +56,7 @@ const getEndpoint = () => {
   return `${(useSslConnection ? 'https' : 'http')}://${clientEndpoint}:${clientPort}`;
 };
 
+// S3 client
 const s3Client = new s3.S3Client({
   region: bucketRegion,
   endpoint: getEndpoint(),
@@ -64,6 +65,8 @@ const s3Client = new s3.S3Client({
   tls: useSslConnection
 });
 
+// 使用AWS SDK来检查一个存储桶是否存在，通过使用HeadBucketCommand命令。如果存储桶存在，它将返回true。
+// 如果存储桶不存在，它将使用CreateBucketCommand命令创建该存储桶，然后返回true。
 export const initializeBucket = async () => {
   try {
     // Try to access to the bucket
@@ -88,6 +91,8 @@ export const deleteBucket = async () => {
 
 export const isStorageAlive = () => initializeBucket();
 
+
+// 使用loadFile函数加载一个文件，使用s3Client对象从AWS S3存储桶中删除文件，删除一些与文件相关的工作，最后返回加载文件的结果。
 export const deleteFile = async (context, user, id) => {
   const up = await loadFile(user, id);
   logApp.debug(`[FILE STORAGE] delete file ${id} by ${user.user_email}`);
@@ -147,6 +152,9 @@ export const storeFileConverter = (user, file) => {
   };
 };
 
+// 使用s3Client发送一个HeadObjectCommand到一个S3存储桶，以检索关于指定filename的文件的元数据。
+// 然后，它处理元数据并返回一个包含有关文件的信息的对象，例如文件的ID、名称、大小、上次修改日期和上传状态。
+// 如果找不到文件，则会抛出一个带有消息"File not found"和关于用户和文件名的附加信息的DatabaseError。
 export const loadFile = async (user, filename) => {
   try {
     const object = await s3Client.send(new s3.HeadObjectCommand({
@@ -250,7 +258,9 @@ export const uploadJobImport = async (context, user, fileId, fileMime, entityId,
   return connectors;
 };
 
+// 将文件上传到 S3 存储桶
 export const upload = async (context, user, path, fileUpload, opts) => {
+  logApp.info('[FILE STORAGE] Upload file', { user_id: user.id, path });
   const { entity, meta = {}, noTriggerImport = false, errorOnExisting = false } = opts;
   const { createReadStream, filename, mimetype, encoding = '' } = await fileUpload;
   const key = `${path}/${filename}`;
