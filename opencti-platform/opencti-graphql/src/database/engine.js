@@ -2576,6 +2576,8 @@ const elUpdateConnectionsOfElement = async (documentId, documentBody) => {
     throw DatabaseError('[SEARCH] Error updating elastic (connections)', { error: err, documentId, body: documentBody });
   });
 };
+
+// 更新一个元素的索引和连接
 export const elUpdateElement = async (instance) => {
   // Update the element it self
   const esData = prepareElementForIndexing(instance);

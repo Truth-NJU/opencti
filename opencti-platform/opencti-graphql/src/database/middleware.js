@@ -495,6 +495,9 @@ const loadElementsWithDependencies = async (context, user, elements, opts = {}) 
   }
   return loadedElements;
 };
+
+// 使用elFindByIds函数通过ID查找元素，传入context，user，ids和一些额外的选项。如果找到任何元素，则调用loadElementsWithDependencies函数来加载这些元素及其依赖项，使用context，user，找到的elements和提供的opts。
+// 如果未找到任何元素，则返回一个空数组。
 const loadByIdsWithDependencies = async (context, user, ids, opts = {}) => {
   const elements = await elFindByIds(context, user, ids, { ...opts, withoutRels: true, connectionFormat: false });
   if (elements.length > 0) {

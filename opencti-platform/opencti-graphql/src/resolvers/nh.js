@@ -2,7 +2,8 @@ import {
     addArch,
     findById,
     findAllArchs,
-    deleteArch
+    deleteArch,
+    NHFileUpLoad
   } from '../domain/nh';
   
   const archResolvers = {
@@ -16,6 +17,7 @@ import {
     Mutation: {
       archAdd: (_, { input }, context) => addArch(context, context.user, input),
       archDelete:(_, {indexName}, context) => deleteArch(context, context.user, indexName),
+      uploadFile: (_,{ id, file, noTriggerImport = false },context) => NHFileUpLoad(context, context.user, id, file, noTriggerImport),
     },
   };
   

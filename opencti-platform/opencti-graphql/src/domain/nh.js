@@ -1,15 +1,35 @@
-import * as R from 'ramda';
 import {
   createNHEntity,
 } from '../database/middleware';
 import { storeLoadById } from '../database/middleware-loader';
 import { elRawNHSearch, elRawDeleteByQuery } from '../database/engine';
-import { BUS_TOPICS, logApp } from '../config/conf';
-import { notify } from '../database/redis';
+import { logApp } from '../config/conf';
 import { ENTITY_TYPE_CONTAINER_ARCH } from '../schema/stixDomainObject';
+import * as R from 'ramda';
 import {
-  ABSTRACT_NH_OBJECT
+  createEntity,
+  createRelationRaw,
+  storeLoadByIdWithRefs,
+} from '../database/middleware';
+import { storeLoadById } from '../database/middleware-loader';
+import { lockResource, notify, storeUpdateEvent } from '../database/redis';
+import { BUS_TOPICS, logApp } from '../config/conf';
+import { LockTimeoutError, TYPE_LOCK_ERROR, UnsupportedError } from '../config/errors';
+import {
+  INPUT_EXTERNAL_REFS,
 } from '../schema/general';
+import {
+  RELATION_EXTERNAL_REFERENCE,
+} from '../schema/stixRefRelationship';
+import {
+  ENTITY_TYPE_EXTERNAL_REFERENCE,
+} from '../schema/stixMetaObject';
+import { now } from '../utils/format';
+import { storeFileConverter, upload } from '../database/file-storage';
+import { elUpdateElement } from '../database/engine';
+import { generateStandardId, getInstanceIds } from '../schema/identifier';
+import { getEntitySettingFromCache } from '../modules/entitySetting/entitySetting-utils';
+import { buildContextDataForFile, publishUserAction } from '../listener/UserActionListener';
 
 export const findById = (context, user, archId) => {
   logApp.info(`[NH] Find by id [${archId}]`);
@@ -56,4 +76,81 @@ export const addArch = async (context, user, input) => {
   // 会在es中创建索引
   const created = await createNHEntity(context, user, arch, ENTITY_TYPE_CONTAINER_ARCH);
   return arch;
+};
+
+
+export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = false) => {
+  // let lock;
+  const previous = await storeLoadByIdWithRefs(context, user, id);
+  if (!previous) {
+    throw UnsupportedError('Cant upload a file an none existing element', { id });
+  }
+  // const participantIds = getInstanceIds(previous);
+  try {
+    // Lock the participants that will be merged
+    // redis锁相关
+    // lock = await lockResource(participantIds);
+    // internal_id就是elasticsearch数据库中的_id字段对应的值
+    const { internal_id: internalId } = previous;
+    const { filename } = await file;
+    // const entitySetting = await getEntitySettingFromCache(context, previous.entity_type);
+    // const isAutoExternal = !entitySetting ? false : entitySetting.platform_entity_files_ref;
+    const filePath = `import/${previous.entity_type}/${internalId}`;
+    logApp.info('[FILE STORAGE] NH File UpLoad', { user_id: user.id, path: filePath, filename });
+    // 01. Upload the file
+    const meta = {};
+    // if (isAutoExternal) {
+    //   const key = `${filePath}/${filename}`;
+    //   meta.external_reference_id = generateStandardId(ENTITY_TYPE_EXTERNAL_REFERENCE, { url: `/storage/get/${key}` });
+    // }
+    const up = await upload(context, user, filePath, file, { meta, noTriggerImport, entity: previous });
+    // 02. Create and link external ref if needed.
+    // let addedExternalRef;
+    // if (isAutoExternal) {
+    //   // Create external ref + link to current entity
+    //   const createExternal = { source_name: filename, url: `/storage/get/${up.id}`, fileId: up.id };
+    //   const externalRef = await createEntity(context, user, createExternal, ENTITY_TYPE_EXTERNAL_REFERENCE);
+    //   const relInput = { fromId: id, toId: externalRef.id, relationship_type: RELATION_EXTERNAL_REFERENCE };
+    //   const opts = { publishStreamEvent: false, locks: participantIds };
+    //   await createRelationRaw(context, user, relInput, opts);
+    //   addedExternalRef = externalRef;
+    // }
+    // Patch the updated_at to force live stream evolution
+    // const eventFile = storeFileConverter(user, up);
+    // const files = [...(previous.x_opencti_files ?? []).filter((f) => f.id !== up.id), eventFile];
+    // await elUpdateElement({
+    //   _index: previous._index,
+    //   internal_id: internalId,
+    //   updated_at: now(),
+    //   x_opencti_files: files
+    // });
+    // // Stream event generation
+    // if (addedExternalRef) {
+    //   const newExternalRefs = [...(previous[INPUT_EXTERNAL_REFS] ?? []), addedExternalRef];
+    //   const instance = { ...previous, x_opencti_files: files, [INPUT_EXTERNAL_REFS]: newExternalRefs };
+    //   const message = `adds \`${up.name}\` in \`files\` and \`external_references\``;
+    //   await storeUpdateEvent(context, user, previous, instance, message);
+    // } else {
+    //   const instance = { ...previous, x_opencti_files: files };
+    //   await storeUpdateEvent(context, user, previous, instance, `adds \`${up.name}\` in \`files\``);
+    // }
+    // Add in activity only for notifications
+    const contextData = buildContextDataForFile(previous, filePath, up.name);
+    await publishUserAction({
+      user,
+      event_type: 'file',
+      event_access: 'extended',
+      event_scope: 'create',
+      prevent_indexing: true,
+      context_data: contextData
+    });
+    return up;
+  } catch (err) {
+    // if (err.name === TYPE_LOCK_ERROR) {
+    //   throw LockTimeoutError({ participantIds });
+    // }
+    // throw err;
+  } finally {
+    // if (lock) await lock.unlock();
+  }
 };

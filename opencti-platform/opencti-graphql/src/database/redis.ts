@@ -323,6 +323,8 @@ export const redisFetchLatestDeletions = async () => {
   return getClientLock().zrange('platform-deletions', 0, -1);
 };
 const defaultLockOpts = { automaticExtension: true, retryCount: conf.get('app:concurrency:retry_count') };
+
+// 实现了使用Redis获取和管理资源锁的机制。
 export const lockResource = async (resources: Array<string>, opts: { automaticExtension?: boolean, retryCount?: number } = defaultLockOpts) => {
   let timeout: NodeJS.Timeout | undefined;
   const locks = R.uniq(resources).map((id) => `{locks}:${id}`);
