@@ -9182,7 +9182,7 @@ type Mutation {
   csvMapperFieldPatch(id: ID!, input: [EditInput!]!): CsvMapper
   archAdd(input: ArchInput): Arch
   archDelete(indexName: String!): ArchDelete
-  uploadFile(input: FileInput): FileUpload
+  uploadFile(file: Upload!): FileUpload
 }
 
 type Channel implements BasicObject & StixObject & StixCoreObject & StixDomainObject {
@@ -12566,10 +12566,6 @@ input ArchInput {
   pdf: String
   txt: String
   bz: String
-}
-
-input FileInput {
-  file: Upload
 }
 
 type ArchDelete {

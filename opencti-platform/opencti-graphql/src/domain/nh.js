@@ -61,22 +61,27 @@ export const addArch = async (context, user, input) => {
 
 
 export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = false) => {
+  // TODO: 注释的部分需要看懂逻辑后加上
   // let lock;
-  const previous = await storeLoadByIdWithRefs(context, user, id);
-  if (!previous) {
-    throw UnsupportedError('Cant upload a file an none existing element', { id });
-  }
+  // const previous = await storeLoadByIdWithRefs(context, user, id);
+  // if (!previous) {
+  //   throw UnsupportedError('Cant upload a file an none existing element', { id });
+  // }
   // const participantIds = getInstanceIds(previous);
   try {
     // Lock the participants that will be merged
     // redis锁相关
     // lock = await lockResource(participantIds);
     // internal_id就是elasticsearch数据库中的_id字段对应的值
-    const { internal_id: internalId } = previous;
+    // const { internal_id: internalId } = previous;
+    logApp.info('[FILE STORAGE] NH File UpLoad', { user_id: user.id });
+    logApp.info(`[FILE STORAGE] NH File UpLoad ${file} `);
     const { filename } = await file;
+    logApp.info('[FILE STORAGE] NH File UpLoad', { filename });
     // const entitySetting = await getEntitySettingFromCache(context, previous.entity_type);
     // const isAutoExternal = !entitySetting ? false : entitySetting.platform_entity_files_ref;
-    const filePath = `import/${previous.entity_type}/${internalId}`;
+    // const filePath = `import/${previous.entity_type}/${internalId}`;
+    const filePath = `import/nh`;
     logApp.info('[FILE STORAGE] NH File UpLoad', { user_id: user.id, path: filePath, filename });
     // 01. Upload the file
     const meta = {};
