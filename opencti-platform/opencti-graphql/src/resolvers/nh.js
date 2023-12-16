@@ -17,7 +17,7 @@ import {
     Mutation: {
       archAdd: (_, { input }, context) => addArch(context, context.user, input),
       archDelete:(_, {indexName}, context) => deleteArch(context, context.user, indexName),
-      uploadFile: (_,{ id, file, noTriggerImport = false },context) => NHFileUpLoad(context, context.user, id, file, noTriggerImport),
+      uploadFile: (_,{ file},context) => NHFileUpLoad(context, context.user, "SXkWC4wBzUgAc09xmsmX", file, false),
     },
   };
   

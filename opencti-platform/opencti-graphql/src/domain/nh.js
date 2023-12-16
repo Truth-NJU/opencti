@@ -5,30 +5,11 @@ import { storeLoadById } from '../database/middleware-loader';
 import { elRawNHSearch, elRawDeleteByQuery } from '../database/engine';
 import { logApp } from '../config/conf';
 import { ENTITY_TYPE_CONTAINER_ARCH } from '../schema/stixDomainObject';
-import * as R from 'ramda';
 import {
-  createEntity,
-  createRelationRaw,
   storeLoadByIdWithRefs,
 } from '../database/middleware';
-import { storeLoadById } from '../database/middleware-loader';
-import { lockResource, notify, storeUpdateEvent } from '../database/redis';
-import { BUS_TOPICS, logApp } from '../config/conf';
-import { LockTimeoutError, TYPE_LOCK_ERROR, UnsupportedError } from '../config/errors';
-import {
-  INPUT_EXTERNAL_REFS,
-} from '../schema/general';
-import {
-  RELATION_EXTERNAL_REFERENCE,
-} from '../schema/stixRefRelationship';
-import {
-  ENTITY_TYPE_EXTERNAL_REFERENCE,
-} from '../schema/stixMetaObject';
-import { now } from '../utils/format';
-import { storeFileConverter, upload } from '../database/file-storage';
-import { elUpdateElement } from '../database/engine';
-import { generateStandardId, getInstanceIds } from '../schema/identifier';
-import { getEntitySettingFromCache } from '../modules/entitySetting/entitySetting-utils';
+import { UnsupportedError } from '../config/errors';
+import { upload } from '../database/file-storage';
 import { buildContextDataForFile, publishUserAction } from '../listener/UserActionListener';
 
 export const findById = (context, user, archId) => {
@@ -144,7 +125,10 @@ export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = fa
       prevent_indexing: true,
       context_data: contextData
     });
-    return up;
+    let FileUpload = {
+      fileName: filename,
+    }
+    return FileUpload;
   } catch (err) {
     // if (err.name === TYPE_LOCK_ERROR) {
     //   throw LockTimeoutError({ participantIds });

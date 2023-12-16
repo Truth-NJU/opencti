@@ -409,6 +409,9 @@ const registerNHGraphqlSchema = () => {
       type ArchDelete {
         indexName: String!
       }
+      type FileUpload {
+        fileName: String!
+      }
       type Query {
         arch(id:ID!): Arch
         allArchs(indexName: String!): [Arch]
@@ -416,7 +419,7 @@ const registerNHGraphqlSchema = () => {
       type Mutation {
         archAdd(input: ArchInput): Arch
         archDelete(indexName: String!): ArchDelete
-        uploadFile (id: ID, file: FileInput, noTriggerImport: Boolean): String
+        uploadFile(input: FileInput): FileUpload
       }
   `;
   schemaTypeDefs.push(archDefs);
