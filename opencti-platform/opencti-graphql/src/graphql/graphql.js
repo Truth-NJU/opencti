@@ -86,6 +86,8 @@ const createApolloServer = () => {
     schema,
     introspection: true, // Will be disabled by plugin if needed
     persistedQueries: false,
+    // csrfPrevention: false,
+    // uploads: false,
     validationRules: apolloValidationRules,
     async context({ req, res }) {
       const executeContext = executionContext('api');

@@ -500,6 +500,7 @@ const loadElementsWithDependencies = async (context, user, elements, opts = {}) 
 // 如果未找到任何元素，则返回一个空数组。
 const loadByIdsWithDependencies = async (context, user, ids, opts = {}) => {
   const elements = await elFindByIds(context, user, ids, { ...opts, withoutRels: true, connectionFormat: false });
+  // logApp.info(`[NH File Upload] ${elements}`);
   if (elements.length > 0) {
     return loadElementsWithDependencies(context, user, elements, opts);
   }

@@ -335,11 +335,10 @@ src/back.js负责启动整个后端，会调用platformStart方法，platformSta
 
 ## 2.2 文件上传
 
-### 2.2.1 源代码示例
-
 1. 文件上传调用的是src/database/file-storage.js下的upload方法。在opencti-platform/opencti-graphql/src/resolvers/stixCoreObject.js中使用了stixCoreObjectImportPush方法，该方法会调用upload方法来上传文件。
 2. 上传后的文件会存储到minio S3存储桶中，也就是docker的minio镜像中的data/opencti-bucket/import/report目录下<img src="./img/minio.png" alt="img" style="zoom:60%;" />
 3. 前端写的时候可以参照opencti-platform/opencti-front/src/private/components/common/files/FileUploader.tsx
+4. 注意前端发送请求的时候和常规请求不太一样，可以参照 https://juejin.cn/s/node%20js%20graphql%20upload%20file 来写。目前实现了一个版本，在NH_Database/Kipso/api目录下。
 
 # 3. 工具使用
 

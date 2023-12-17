@@ -315,6 +315,62 @@ export const upload = async (context, user, path, fileUpload, opts) => {
   return file;
 };
 
+export const NHUpload = async (context, user, path, fileUpload, opts) => {
+  logApp.info('[FILE STORAGE] Upload file', { user_id: user.id, path });
+  const { entity, meta = {}, noTriggerImport = false, errorOnExisting = false } = opts;
+  const { createReadStream, filename, mimetype, encoding = '' } = await fileUpload;
+  const key = `${path}/${filename}`;
+  let existingFile = null;
+  try {
+    existingFile = await loadFile(user, key);
+  } catch {
+    // do nothing
+  }
+  if (errorOnExisting && existingFile) {
+    throw FunctionalError('A file already exists with this name');
+  }
+  // Upload the data
+  const readStream = createReadStream();
+  const fileMime = mime.lookup(filename) || mimetype;
+  const metadata = { ...meta };
+  if (!metadata.version) {
+    metadata.version = now();
+  }
+  const fullMetadata = {
+    ...metadata,
+    filename: encodeURIComponent(filename),
+    mimetype: fileMime,
+    encoding,
+    creator_id: user.id,
+    // entity_id: entity?.internal_id,
+  };
+  const s3Upload = new Upload({
+    client: s3Client,
+    params: {
+      Bucket: bucketName,
+      Key: key,
+      Body: readStream,
+      Metadata: fullMetadata
+    }
+  });
+  await s3Upload.done();
+  const file = {
+    id: key,
+    name: filename,
+    size: readStream.bytesRead,
+    information: '',
+    lastModified: new Date(),
+    lastModifiedSinceMin: sinceNowInMinutes(new Date()),
+    metaData: { ...fullMetadata, messages: [], errors: [] },
+    uploadStatus: 'complete'
+  };
+  // Trigger a enrich job for import file if needed
+  // if (!noTriggerImport && path.startsWith('import/') && !path.startsWith('import/pending') && !path.startsWith('import/External-Reference')) {
+  //   await uploadJobImport(context, user, file.id, file.metaData.mimetype, file.metaData.entity_id);
+  // }
+  return file;
+};
+
 export const filesListing = async (context, user, first, path, entity = null, prefixMimeType = '') => {
   const filesListingFn = async () => {
     let files = await rawFilesListing(context, user, path);

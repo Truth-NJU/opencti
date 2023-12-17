@@ -9,7 +9,7 @@ import {
   storeLoadByIdWithRefs,
 } from '../database/middleware';
 import { UnsupportedError } from '../config/errors';
-import { upload } from '../database/file-storage';
+import { NHUpload } from '../database/file-storage';
 import { buildContextDataForFile, publishUserAction } from '../listener/UserActionListener';
 
 export const findById = (context, user, archId) => {
@@ -74,10 +74,7 @@ export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = fa
     // lock = await lockResource(participantIds);
     // internal_id就是elasticsearch数据库中的_id字段对应的值
     // const { internal_id: internalId } = previous;
-    logApp.info('[FILE STORAGE] NH File UpLoad', { user_id: user.id });
-    logApp.info(`[FILE STORAGE] NH File UpLoad ${file} `);
     const { filename } = await file;
-    logApp.info('[FILE STORAGE] NH File UpLoad', { filename });
     // const entitySetting = await getEntitySettingFromCache(context, previous.entity_type);
     // const isAutoExternal = !entitySetting ? false : entitySetting.platform_entity_files_ref;
     // const filePath = `import/${previous.entity_type}/${internalId}`;
@@ -89,7 +86,7 @@ export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = fa
     //   const key = `${filePath}/${filename}`;
     //   meta.external_reference_id = generateStandardId(ENTITY_TYPE_EXTERNAL_REFERENCE, { url: `/storage/get/${key}` });
     // }
-    const up = await upload(context, user, filePath, file, { meta, noTriggerImport, entity: previous });
+    const up = await NHUpload(context, user, filePath, file, { meta, noTriggerImport, entity: null });
     // 02. Create and link external ref if needed.
     // let addedExternalRef;
     // if (isAutoExternal) {
@@ -121,15 +118,15 @@ export const NHFileUpLoad = async (context, user, id, file, noTriggerImport = fa
     //   await storeUpdateEvent(context, user, previous, instance, `adds \`${up.name}\` in \`files\``);
     // }
     // Add in activity only for notifications
-    const contextData = buildContextDataForFile(previous, filePath, up.name);
-    await publishUserAction({
-      user,
-      event_type: 'file',
-      event_access: 'extended',
-      event_scope: 'create',
-      prevent_indexing: true,
-      context_data: contextData
-    });
+    // const contextData = buildContextDataForFile(previous, filePath, up.name);
+    // await publishUserAction({
+    //   user,
+    //   event_type: 'file',
+    //   event_access: 'extended',
+    //   event_scope: 'create',
+    //   prevent_indexing: true,
+    //   context_data: contextData
+    // });
     let FileUpload = {
       fileName: filename,
     }
