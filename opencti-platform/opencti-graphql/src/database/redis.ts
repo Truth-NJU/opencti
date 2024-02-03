@@ -25,6 +25,7 @@ import type {
   BaseEvent,
   CreateEventOpts,
   DeleteEvent,
+  NHEvent,
   EventOpts,
   MergeEvent,
   SseEvent,
@@ -52,6 +53,7 @@ const isStreamPublishable = (opts: EventOpts) => {
   return opts.publishStreamEvent === undefined || opts.publishStreamEvent;
 };
 
+// 设置连接到 Redis 服务器的各种选项，包括键前缀、用户名、密码、TLS 配置、重试策略和其他连接设置。
 const redisOptions = (autoReconnect = false): RedisOptions => ({
   keyPrefix: REDIS_PREFIX,
   username: conf.get('redis:username'),
@@ -104,6 +106,8 @@ const clusterOptions = (): ClusterOptions => ({
   showFriendlyErrorStack: DEV_MODE,
 });
 
+// 创建并返回一个 Redis 客户端。该函数接受一个 provider 字符串参数和一个可选的 autoReconnect 布尔参数。
+// 它检查 Redis 模式是集群还是单节点，然后相应地创建和配置 Redis 客户端。它还为客户端事件设置了监听器，如关闭、就绪、错误和重新连接。
 export const createRedisClient = (provider: string, autoReconnect = false): Cluster | Redis => {
   let client: Cluster | Redis;
   const isCluster = conf.get('redis:mode') === 'cluster';
@@ -149,6 +153,8 @@ const getClientPubSub = (): RedisPubSub => redisClients.pubsub;
 export const pubSubAsyncIterator = (topic: string | string[]) => {
   return getClientPubSub().asyncIterator(topic);
 };
+// 用于创建一个订阅发布/订阅（pub/sub）主题。它接受主题字符串和消息处理函数作为参数，并返回一个带有主题和取消订阅函数的对象。
+// 当在指定主题上接收到消息时，将调用提供的消息处理函数。
 export const pubSubSubscription = async <T>(topic: string, onMessage: (message: T) => void) => {
   const subscription = await getClientPubSub().subscribe(topic, onMessage, { pattern: true });
   const unsubscribe = () => getClientPubSub().unsubscribe(subscription);
@@ -514,6 +520,16 @@ export const buildCreateEvent = (user: AuthUser, instance: StoreObject, message:
     data: stix,
   };
 };
+
+export const buildCreateNHEvent = (user: AuthUser, instance: StoreObject, message: string): NHEvent => {
+  return {
+    version: EVENT_CURRENT_VERSION,
+    type: EVENT_TYPE_CREATE,
+    message,
+    origin: user.origin,
+    data: instance,
+  };
+};
 export const storeCreateRelationEvent = async (context: AuthContext, user: AuthUser, instance: StoreRelation, opts: CreateEventOpts = {}) => {
   try {
     if (isStixExportableData(instance)) {
@@ -528,6 +544,8 @@ export const storeCreateRelationEvent = async (context: AuthContext, user: AuthU
     throw DatabaseError('Error in store create relation event', { error: e });
   }
 };
+
+
 export const storeCreateEntityEvent = async (context: AuthContext, user: AuthUser, instance: StoreObject, message: string, opts: CreateEventOpts = {}) => {
   try {
     if (isStixExportableData(instance)) {
@@ -536,6 +554,16 @@ export const storeCreateEntityEvent = async (context: AuthContext, user: AuthUse
       return event;
     }
     return undefined;
+  } catch (e) {
+    throw DatabaseError('Error in store create entity event', { error: e });
+  }
+};
+
+export const storeCreateNHEntityEvent = async (context: AuthContext, user: AuthUser, instance: StoreObject, message: string, opts: CreateEventOpts = {}) => {
+  try {
+      const event = buildCreateNHEvent(user, instance, message);
+      await pushToStream(context, user, getClientBase(), event, opts);
+      return event;
   } catch (e) {
     throw DatabaseError('Error in store create entity event', { error: e });
   }

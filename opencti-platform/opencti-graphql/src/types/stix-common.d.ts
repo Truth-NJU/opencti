@@ -133,3 +133,5 @@ interface StixMarkingsObject extends StixObject {
 
 // Stix core definition
 export type StixCoreObject = StixDomainObject | StixCyberObject | StixRelation | StixSighting;
+
+

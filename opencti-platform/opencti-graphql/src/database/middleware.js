@@ -94,6 +94,7 @@ import {
   notify,
   redisAddDeletions,
   storeCreateEntityEvent,
+  storeCreateNHEntityEvent,
   storeCreateRelationEvent,
   storeDeleteEvent,
   storeMergeEvent,
@@ -3257,11 +3258,12 @@ const buildNHEntityData = async (context, user, input, type, opts = {}) => {
   return {
     isCreation: true,
     element: data,
-    message: null,
+    message: "数据创建成功",
     previous: null,
     relations: null, // Added meta relationships
   };
 };
+
 
 const createNHEntityRaw = async (context, user, input, type, opts = {}) => {
   let dataEntity;
@@ -3273,14 +3275,15 @@ const createNHEntityRaw = async (context, user, input, type, opts = {}) => {
   // 它将创建的元素转换为适合索引的格式，并发送到Elasticsearch进行索引。这个函数通常在创建新的实体后被调用，以确保新创建的实体可以被快速搜索和查询。
   await indexCreatedElement(context, user, dataEntity);
   for(let key in dataEntity.element){ 
-    logApp.info(`[NH] ${key}:${dataEntity.element[key]}`);
+    logApp.info(`[NH-Redis] ${key}:${dataEntity.element[key]}`);
   }
   // Push the input in the stream
-  // const createdElement = { ...input, ...dataEntity.element };
-  // // 将创建的实体事件存储到redis中
-  // const event = await storeCreateEntityEvent(context, user, createdElement, dataEntity.message, opts);
+  const createdElement = { ...input, ...dataEntity.element };
+  // logApp.info(`[NH-Redis] ${createdElement}`);
+  //  将创建的实体事件存储到redis中
+  const event = await storeCreateNHEntityEvent(context, user, createdElement, dataEntity.message, opts);
   // Return created element after waiting for it.
-  return { element: dataEntity.element, isCreation: true };
+  return { element: dataEntity.element, event, isCreation: true };
 };
 
 export const createEntity = async (context, user, input, type, opts = {}) => {

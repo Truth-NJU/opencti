@@ -45,6 +45,14 @@ interface StreamDataEvent extends BaseEvent {
   data: StixCoreObject
 }
 
+interface NHEvent extends BaseEvent {
+  type: 'create';
+  origin: Partial<UserOrigin>;
+  message: string;
+  data: StoreObject
+}
+
+
 interface UpdateEvent extends StreamDataEvent {
   type: 'update';
   commit: CommitContext | undefined;

@@ -278,6 +278,7 @@ const registerNHGraphqlSchema = () => {
   // `;
   const archDefs = gql`
       type Arch {
+        id: String
         tm: String
         ym: String
         zzyuanm: String
@@ -410,7 +411,7 @@ const registerNHGraphqlSchema = () => {
         fileName: String!
       }
       type Query {
-        arch(id:ID!): Arch
+        arch(id:String): Arch
         allArchs(indexName: String!): [Arch]
       }
       type Mutation {

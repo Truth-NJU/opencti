@@ -3,7 +3,7 @@ import {
     findById,
     findAllArchs,
     deleteArch,
-    NHFileUpLoad
+    NHFileUpLoad,
   } from '../domain/nh';
   
   const archResolvers = {

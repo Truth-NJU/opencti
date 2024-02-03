@@ -8438,7 +8438,7 @@ type Query {
   csvMapper(id: String!): CsvMapper
   csvMappers(first: Int, after: ID, orderBy: CsvMapperOrdering, orderMode: OrderingMode, filters: [CsvMapperFiltering!], filterMode: FilterMode, search: String): CsvMapperConnection
   csvMapperTest(configuration: String!, content: String!): JSON
-  arch(id: ID!): Arch
+  arch(id: String): Arch
   allArchs(indexName: String!): [Arch]
 }
 
@@ -12441,6 +12441,7 @@ input CsvMapperAddInput {
 }
 
 type Arch {
+  id: String
   tm: String
   ym: String
   zzyuanm: String

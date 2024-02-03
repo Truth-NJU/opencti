@@ -2,22 +2,18 @@ import {
   createNHEntity,
 } from '../database/middleware';
 import { storeLoadById } from '../database/middleware-loader';
-import { elRawNHSearch, elRawDeleteByQuery } from '../database/engine';
+import { elRawNHSearch, elRawDeleteByQuery,elFindByNHId } from '../database/engine';
 import { logApp } from '../config/conf';
 import { ENTITY_TYPE_CONTAINER_ARCH } from '../schema/stixDomainObject';
-import {
-  storeLoadByIdWithRefs,
-} from '../database/middleware';
-import { UnsupportedError } from '../config/errors';
 import { NHUpload } from '../database/file-storage';
-import { buildContextDataForFile, publishUserAction } from '../listener/UserActionListener';
 
 export const findById = (context, user, archId) => {
-  logApp.info(`[NH] Find by id [${archId}]`);
+  // logApp.info(`[NH] Find by id [${archId}]`);
   // 通过es查询
-  return storeLoadById(context, user, archId, ENTITY_TYPE_CONTAINER_ARCH);
+  return elFindByNHId(archId);
 };
 
+// 查找所有的文档，带有id
 export const findAllArchs = (context, user, indexName) => {
   const query = {
     index: indexName,
@@ -27,7 +23,7 @@ export const findAllArchs = (context, user, indexName) => {
       }
     }
   };
-  logApp.info(`[NH] Find archs in index: [${indexName}]`);
+  // logApp.info(`[NH] Find archs in index: [${indexName}]`);
   // 通过es查询
   return elRawNHSearch(query);
 };
@@ -53,7 +49,7 @@ export const deleteArch = (context, user, indexName) => {
 
 export const addArch = async (context, user, input) => {
   // const finalArch = R.assoc('created', arch.published, arch);
-  const arch = input
+  const arch = input;
   // 会在es中创建索引
   const created = await createNHEntity(context, user, arch, ENTITY_TYPE_CONTAINER_ARCH);
   return arch;

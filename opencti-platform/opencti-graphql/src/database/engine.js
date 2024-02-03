@@ -265,14 +265,18 @@ export const elRawNHSearch = (query) => {
     // logApp.info(`[NH] Find all archs result's length is ${result.hits.hits.length}`);
     const archs = [];
     for (var i = 0; i < result.hits.hits.length; i++) {
+      result.hits.hits[i]['_source']['id']=result.hits.hits[i]['_id'];
+      // logApp.info(`[NH] ${typeof result.hits.hits[i]['_id']}`);
       archs.push(result.hits.hits[i]['_source']);
-      // logApp.info(`[NH] Find all archs result: ${Object.keys(result.hits.hits[i]['_source'])}`);
-      // logApp.info(`[NH] Find all archs result: ${Object.values(result.hits.hits[i]['_source'])}`);
+      // for(let key in result.hits.hits[i]['_source']){ 
+      //   logApp.info(`[NH] ${key}:${result.hits.hits[i]['_source'][key]}`);
+      // }
     }
     return archs;
   });
   return elRawSearchFn;
 };
+
 
 // 它使用engine.deleteByQuery方法根据提供的查询删除数据，然后返回调用oebp函数并传入被删除的数据的结果
 export const elRawDeleteByQuery = (query) => engine.deleteByQuery(query).then((r) => oebp(r));
@@ -1281,9 +1285,39 @@ export const elFindByIds = async (context, user, ids, opts = {}) => {
   return toMap ? hits : Object.values(hits);
 };
 
+export const elFindByNHId = async (id) => {
+  logApp.info(`[NH] ${id}`);
+    const body = {
+      query: {
+        bool: {
+          must: {
+            term: { "_id":  id}
+          }
+        },
+      },
+    };
+    const query = {
+      body
+    };
+    const elRawSearchFn = engine.search(query).then((r) => {
+      const result = oebp(r);
+      // logApp.info(`[NH] Find all archs result's length is ${result.hits.hits.length}`);
+      for (var i = 0; i < result.hits.hits.length; i++) {
+        result.hits.hits[i]['_source']['id']=result.hits.hits[i]['_id'];
+        logApp.info(`[NH] ${typeof result.hits.hits[i]['_id']}`);
+        return result.hits.hits[i]['_source'];
+        // for(let key in result.hits.hits[i]['_source']){ 
+        //   logApp.info(`[NH] ${key}:${result.hits.hits[i]['_source'][key]}`);
+        // }
+      }
+    });
+    return elRawSearchFn;
+};
+
 // 用于根据给定的ID从索引中加载文档。它通常用于查找和检索特定文档的内容。
 export const elLoadById = async (context, user, id, opts = {}) => {
   const hits = await elFindByIds(context, user, id, opts);
+  // logApp.info(`[NH] elLoadById ${id} -> ${hits}`);
   /* istanbul ignore if */
   if (hits.length > 1) {
     const errorMeta = { id, hits: hits.length };
@@ -1291,6 +1325,8 @@ export const elLoadById = async (context, user, id, opts = {}) => {
   }
   return R.head(hits);
 };
+
+
 
 // 批量加载文档的操作。它允许您一次性检索多个具有不同ID的文档。
 export const elBatchIds = async (context, user, ids) => {
